@@ -2,6 +2,7 @@
 
 extern "C" {
 	#include "../src/parser.h"
+	#include "../src/string_pool.h"
 }
 
 
@@ -34,21 +35,21 @@ TEST_F(ParserTest, ConstantPoolTags) {
 	EXPECT_EQ(CONSTANT_Methodref, cf->constant_pool[3].tag);
 	EXPECT_EQ(CONSTANT_Class, cf->constant_pool[4].tag);
 	EXPECT_EQ(CONSTANT_Class, cf->constant_pool[5].tag);
-	EXPECT_EQ(CONSTANT_Utf8, cf->constant_pool[6].tag);
-	EXPECT_EQ(CONSTANT_Utf8, cf->constant_pool[7].tag);
-	EXPECT_EQ(CONSTANT_Utf8, cf->constant_pool[8].tag);
-	EXPECT_EQ(CONSTANT_Utf8, cf->constant_pool[9].tag);
-	EXPECT_EQ(CONSTANT_Utf8, cf->constant_pool[10].tag);
-	EXPECT_EQ(CONSTANT_Utf8, cf->constant_pool[11].tag);
-	EXPECT_EQ(CONSTANT_Utf8, cf->constant_pool[12].tag);
-	EXPECT_EQ(CONSTANT_Utf8, cf->constant_pool[13].tag);
-	EXPECT_EQ(CONSTANT_Utf8, cf->constant_pool[14].tag);
-	EXPECT_EQ(CONSTANT_Utf8, cf->constant_pool[15].tag);
+	EXPECT_EQ(RESOLVED_Utf8, cf->constant_pool[6].tag);
+	EXPECT_EQ(RESOLVED_Utf8, cf->constant_pool[7].tag);
+	EXPECT_EQ(RESOLVED_Utf8, cf->constant_pool[8].tag);
+	EXPECT_EQ(RESOLVED_Utf8, cf->constant_pool[9].tag);
+	EXPECT_EQ(RESOLVED_Utf8, cf->constant_pool[10].tag);
+	EXPECT_EQ(RESOLVED_Utf8, cf->constant_pool[11].tag);
+	EXPECT_EQ(RESOLVED_Utf8, cf->constant_pool[12].tag);
+	EXPECT_EQ(RESOLVED_Utf8, cf->constant_pool[13].tag);
+	EXPECT_EQ(RESOLVED_Utf8, cf->constant_pool[14].tag);
+	EXPECT_EQ(RESOLVED_Utf8, cf->constant_pool[15].tag);
 	EXPECT_EQ(CONSTANT_NameAndType, cf->constant_pool[16].tag);
-	EXPECT_EQ(CONSTANT_Utf8, cf->constant_pool[17].tag);
+	EXPECT_EQ(RESOLVED_Utf8, cf->constant_pool[17].tag);
 	EXPECT_EQ(CONSTANT_NameAndType, cf->constant_pool[18].tag);
-	EXPECT_EQ(CONSTANT_Utf8, cf->constant_pool[19].tag);
-	EXPECT_EQ(CONSTANT_Utf8, cf->constant_pool[20].tag);
+	EXPECT_EQ(RESOLVED_Utf8, cf->constant_pool[19].tag);
+	EXPECT_EQ(RESOLVED_Utf8, cf->constant_pool[20].tag);
 }
 
 TEST_F(ParserTest, MethodrefConstant) {
@@ -70,11 +71,16 @@ TEST_F(ParserTest, ClassConstant) {
 	EXPECT_EQ(19, cp4.class_info.name_index);
 }
 
-TEST_F(ParserTest, Utf8Constant) {
+TEST_F(ParserTest, ResolvedUtf8Constant) {
 	struct cp_info cp6 = ParserTest::cf->constant_pool[6];
-	ASSERT_EQ(CONSTANT_Utf8, cp6.tag);
-	EXPECT_EQ(6, cp6.utf8_info.length);
-	EXPECT_STREQ("<init>", (const char *) cp6.utf8_info.bytes);
+	ASSERT_EQ(RESOLVED_Utf8, cp6.tag);
+	EXPECT_STREQ("<init>", cp6.r_utf8_info.str);
+}
+
+// Tests if the Utf8 string was saved in the string pool
+TEST_F(ParserTest, Utf8InStringPool) {
+	struct cp_info cp6 = ParserTest::cf->constant_pool[6];
+	EXPECT_EQ(cp6.r_utf8_info.str, find_string("<init>"));
 }
 
 TEST_F(ParserTest, NameAndTypeConstant) {

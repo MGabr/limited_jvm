@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <byteswap.h>
 #include <string.h>
+
 #include "parser.h"
+#include "string_pool.h"
+
 
 int little_endian = 0;
 
@@ -89,18 +92,28 @@ static void parse_constant(struct cp_info *cp, FILE *fp)
 			read_e16(&cp->nameAndType_info.signature_index, fp);
 			break;
 		case CONSTANT_Utf8:
-			read_e16(&cp->utf8_info.length, fp);
-			cp->utf8_info.bytes = malloc(
-				sizeof(u1) * cp->utf8_info.length + 1);
+			; // empty statement, no declarations after labels allowed
+			u2 length;
+			read_e16(&length, fp);
+
 			/* WORKAROUND: add NULL at the end of the string (not Utf8 NULL)
 			 * This allows using string functions, but may cause Utf8 problems
 			 * (Utf8 is currently not supported)
 			 */
+			u1 *str_bytes = malloc(sizeof(u1) * length + 1);
 			int i;
-			for (i = 0; i < cp->utf8_info.length; i++) {
-				read_e8(&cp->utf8_info.bytes[i], fp);
+			for (i = 0; i < length; i++) {
+				read_e8(&str_bytes[i], fp);
 			}
-			cp->utf8_info.bytes[cp->utf8_info.length] = '\0';
+			str_bytes[length] = '\0';
+
+			cp->r_utf8_info.str = add_string((const char *) str_bytes);
+			if (strcmp((const char *) str_bytes, cp->r_utf8_info.str)) { 
+				// already a string with the same name in the string pool
+				free(str_bytes);
+			}
+
+			cp->tag = RESOLVED_Utf8;
 			break;
 		case CONSTANT_Unicode:
 			fprintf(stderr, "Unicode currently not supported.\n");
@@ -150,13 +163,12 @@ static void parse_attribute(struct attribute_info *att, struct cp_info *cp,
 	read_e16(&att->attribute_name_index, fp);
 	read_e32(&att->attribute_length, fp);
 
-	if (cp[att->attribute_name_index].tag != CONSTANT_Utf8) {
+	if (cp[att->attribute_name_index].tag != RESOLVED_Utf8) {
 		fprintf(stderr, "Corrupted class file: Wrong constant type tag %u for attribute_name_index, %u required.\n", att->attribute_name_index, CONSTANT_Utf8);
 		exit(1);
 	}
 
-	const char *att_name
-		= (const char *) cp[att->attribute_name_index].utf8_info.bytes;
+	const char *att_name = cp[att->attribute_name_index].r_utf8_info.str;
 	if (!strcmp(att_name, "ConstantValue")) {
 		parse_ConstantValue_attribute(&att->constantValue_attribute, fp);
 	} else if (!strcmp(att_name, "Code")) {
@@ -266,6 +278,8 @@ struct ClassFile *parse(const char *filename)
 
 	read_e16(&cf->minor_version, fp);
 	read_e16(&cf->major_version, fp);
+
+	init_string_pool();
 
 	parse_constant_pool(cf, fp);	
 

@@ -75,7 +75,9 @@ struct cp_info {
 		struct {
 			u2 string_index;
 		} string_info;
-		// TODO: RESOLVED_String_info
+		struct {
+			const char *str;
+		} r_string_info;
 
 		struct {
 			u4 bytes;
@@ -98,11 +100,12 @@ struct cp_info {
 		} nameAndType_info;
 		// TODO: RESOLVED_NameAndType_info
 
+		// Utf8_info is resolved while parsing, so there is no utf8_info struct
 		// Utf8 currently not supported, Strings interpreted as ASCII
 		struct {
-			u2 length;
-			u1 *bytes;
-		} utf8_info;
+			const char *str;
+		} r_utf8_info;
+
 		/* Unicode currently not supported
 		struct {
 			u2 length;
