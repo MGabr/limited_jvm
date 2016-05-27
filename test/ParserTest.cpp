@@ -73,6 +73,7 @@ TEST_F(ParserTest, ClassConstant) {
 TEST_F(ParserTest, Utf8Constant) {
 	struct cp_info cp6 = ParserTest::cf->constant_pool[6];
 	ASSERT_EQ(CONSTANT_Utf8, cp6.tag);
+	EXPECT_EQ(6, cp6.utf8_info.length);
 	EXPECT_STREQ("<init>", (const char *) cp6.utf8_info.bytes);
 }
 
@@ -105,6 +106,7 @@ TEST_F(ParserTest, ConstructorMethod) {
 TEST_F(ParserTest, ConstructorMethodCode) {
 	struct attribute_info a0 = ParserTest::cf->methods[0].attributes[0];
 	ASSERT_EQ(8, a0.attribute_name_index);
+	EXPECT_EQ(29, a0.attribute_length);
 	struct Code_attribute c0 = a0.code_attribute;
 	EXPECT_EQ(1, c0.max_stack);
 	EXPECT_EQ(1, c0.max_locals);
@@ -122,8 +124,3 @@ TEST_F(ParserTest, SingleSourcecodeAttribute) {
 	EXPECT_EQ(14, ParserTest::cf->attributes[0].attribute_name_index);
 }
 
-int main(int argc, char *argv[])
-{
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
-}

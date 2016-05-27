@@ -54,7 +54,6 @@ static size_t read_e32(u4 *ptr, FILE *stream)
 
 static void parse_constant(struct cp_info *cp, FILE *fp)
 {
-	int i;
 	read_e8(&cp->tag, fp);
 	switch (cp->tag) {
 		case CONSTANT_Class:
@@ -92,21 +91,22 @@ static void parse_constant(struct cp_info *cp, FILE *fp)
 		case CONSTANT_Utf8:
 			read_e16(&cp->utf8_info.length, fp);
 			cp->utf8_info.bytes = malloc(
-				sizeof(u1) * cp->utf8_info.length);
+				sizeof(u1) * cp->utf8_info.length + 1);
+			/* WORKAROUND: add NULL at the end of the string (not Utf8 NULL)
+			 * This allows using string functions, but may cause Utf8 problems
+			 * (Utf8 is currently not supported)
+			 */
+			int i;
 			for (i = 0; i < cp->utf8_info.length; i++) {
 				read_e8(&cp->utf8_info.bytes[i], fp);
 			}
+			cp->utf8_info.bytes[cp->utf8_info.length] = '\0';
 			break;
 		case CONSTANT_Unicode:
-			read_e16(&cp->unicode_info.length, fp);
-			cp->unicode_info.bytes = malloc(
-				sizeof(u1) * cp->unicode_info.length);
-			for (i = 0; i < cp->unicode_info.length; i++) {
-				read_e8(&cp->unicode_info.bytes[i], fp);
-			}
-			break;
+			fprintf(stderr, "Unicode currently not supported.\n");
+			exit(1);
 		default:
-			fprintf(stderr, "Wrong constant type tag %u\n", cp->tag);
+			fprintf(stderr, "Corrupted class file: Wrong constant type tag %u\n", cp->tag);
 			exit(1);
 	}
 }
@@ -133,7 +133,7 @@ static void parse_Code_attribute(struct Code_attribute *code,struct cp_info *cp,
 
 	read_e16(&code->exception_table_length, fp);
 	// exception table currently not supported
-	fseek(fp, code->exception_table_length * 4 * 2, SEEK_CUR); // 4 u2 fields
+	fseek(fp, code->exception_table_length * 4 * sizeof(u2), SEEK_CUR);
 
 	read_e16(&code->attributes_count, fp);
 	code->attributes = malloc (
@@ -147,19 +147,23 @@ static void parse_Code_attribute(struct Code_attribute *code,struct cp_info *cp,
 static void parse_attribute(struct attribute_info *att, struct cp_info *cp, 
 	FILE *fp)
 {
+	read_e16(&att->attribute_name_index, fp);
+	read_e32(&att->attribute_length, fp);
+
 	if (cp[att->attribute_name_index].tag != CONSTANT_Utf8) {
 		fprintf(stderr, "Corrupted class file: Wrong constant type tag %u for attribute_name_index, %u required.\n", att->attribute_name_index, CONSTANT_Utf8);
 		exit(1);
 	}
 
-	char *att_name
-		= (char *) cp[att->attribute_name_index].utf8_info.bytes;
+	const char *att_name
+		= (const char *) cp[att->attribute_name_index].utf8_info.bytes;
 	if (!strcmp(att_name, "ConstantValue")) {
 		parse_ConstantValue_attribute(&att->constantValue_attribute, fp);
 	} else if (!strcmp(att_name, "Code")) {
 		parse_Code_attribute(&att->code_attribute, cp, fp);
 	} else {
-		// other attributes currently not supported 
+		// other attributes currently not supported
+		fprintf(stderr, "Attribute %s currently not supported. Will be ignored.\n", att_name); 
 		fseek(fp, att->attribute_length, SEEK_CUR);
 	}
 }
@@ -197,7 +201,7 @@ static void parse_constant_pool(struct ClassFile *cf, FILE *fp)
 {
 	read_e16(&cf->constant_pool_count, fp);
 	cf->constant_pool = malloc(
-		sizeof(struct cp_info) * (cf->constant_pool_count - 1));
+		sizeof(struct cp_info) * cf->constant_pool_count);
 	int i;
 	for (i = 1; i < cf->constant_pool_count; i++) {
 		parse_constant(&cf->constant_pool[i], fp);
@@ -250,7 +254,6 @@ struct ClassFile *parse(const char *filename)
 	FILE *fp = fopen(filename, "r");
 	struct ClassFile *cf = malloc(sizeof(struct ClassFile));
 
-
 	fread(&cf->magic, sizeof(u4), 1, fp);
 	if (cf->magic != MAGIC) {
 		little_endian = 1; 
@@ -273,6 +276,7 @@ struct ClassFile *parse(const char *filename)
 	parse_interfaces(cf, fp);
 	parse_fields(cf, fp);
 	parse_methods(cf, fp);
+
 	parse_attributes(cf, fp);
 
 	return cf;

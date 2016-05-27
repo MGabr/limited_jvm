@@ -98,14 +98,17 @@ struct cp_info {
 		} nameAndType_info;
 		// TODO: RESOLVED_NameAndType_info
 
+		// Utf8 currently not supported, Strings interpreted as ASCII
 		struct {
 			u2 length;
 			u1 *bytes;
 		} utf8_info;
+		/* Unicode currently not supported
 		struct {
 			u2 length;
 			u1 *bytes;
 		} unicode_info;
+		*/
 	};
 };
 
