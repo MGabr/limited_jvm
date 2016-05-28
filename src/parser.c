@@ -142,7 +142,10 @@ static void parse_Code_attribute(struct Code_attribute *code,struct cp_info *cp,
 
 	read_e32(&code->code_length, fp);
 	code->code = malloc(sizeof(u1) * code->code_length);
-	fread(&code->code, code->code_length, 1, fp);
+	int i;
+	for (i = 0; i < code->code_length; i++) {
+		read_e8(&code->code[i], fp);
+	}
 
 	read_e16(&code->exception_table_length, fp);
 	// exception table currently not supported
@@ -151,7 +154,6 @@ static void parse_Code_attribute(struct Code_attribute *code,struct cp_info *cp,
 	read_e16(&code->attributes_count, fp);
 	code->attributes = malloc (
 		sizeof(struct attribute_info) * code->attributes_count);
-	int i;
 	for (i = 0; i < code->attributes_count; i++) {
 		parse_attribute(&code->attributes[i], cp, fp);
 	}

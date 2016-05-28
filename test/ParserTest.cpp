@@ -122,7 +122,12 @@ TEST_F(ParserTest, ConstructorMethodCode) {
 }
 
 TEST_F(ParserTest, ConstructorMethodInstructions) {
-
+	u1 *code = ParserTest::cf->methods[0].attributes[0].code_attribute.code;
+	EXPECT_EQ(42, *code); // aload_0
+//	EXPECT_EQ(183, code[1]); // invokenonvirtual
+//	EXPECT_EQ(0, code[2]); // index byte 1
+//	EXPECT_EQ(1, code[3]); // index byte 2
+//	EXPECT_EQ(177, code[4]); // return
 }
 
 TEST_F(ParserTest, SingleSourcecodeAttribute) {
