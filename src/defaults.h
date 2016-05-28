@@ -1,3 +1,8 @@
+#ifndef DEFAULTS_H
+#define DEFAULTS_H
+
 #define DEFAULT_STACK_SIZE (128*1024)
 #define DEFAULT_NR_STRING_BUCKETS (1009)
+
+#endif
 

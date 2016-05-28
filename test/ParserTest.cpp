@@ -12,10 +12,10 @@ class ParserTest : public ::testing::Test {
 		cf = parse("classes/HelloWorld.class");
 	}
 	
-	static ClassFile *cf;
+	static struct ClassFile *cf;
 };
 
-ClassFile *ParserTest::cf = NULL;
+struct ClassFile *ParserTest::cf = NULL;
 
 TEST_F(ParserTest, Header) {
 	EXPECT_EQ(0xcafebabe, ParserTest::cf->magic);

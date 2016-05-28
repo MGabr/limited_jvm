@@ -5,7 +5,7 @@ GTEST_HOME=~/usr/gtest
 all:
 	make Tests
 
-Tests: ParserTest.o StringPoolTest.o StringPoolConflictTest.o ../src/parser.o ../src/string_pool.o ../src/options.o
+Tests: ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o
 	make ParserTest.o
 	make StringPoolTest.o
 	make StringPoolConflictTest.o
@@ -29,13 +29,16 @@ StringPoolConflictTest.o:
 ../src/optons.o:
 	cd ../src && make options.o
 
+MainTest.o:
+	g++ ${FLAGS} -c MainTest.cpp ${LIBS}
+
+../src/core.o:
+	cd ../src && make core.o
+
 HelloWorld.class:
 	cd java && javac HelloWorld.java && mv $@ ../classes/.
 
 
 clean:
-	rm classes/*
-	rm Tests
-	rm ParserTest.o StringPoolTest.o StringPoolConflictTest.o 
-	rm ../src/parser.o ../src/string_pool.o ../src/options.o
+	rm classes/* Tests ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o ../src/parser.o ../src/string_pool.o ../src/options.o
 

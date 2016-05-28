@@ -1,3 +1,6 @@
+#ifndef STRING_POOL_H
+#define STRING_POOL_H
+
 /**
  * Initialize the string pool.
  *
@@ -26,4 +29,6 @@ extern const char *add_string(const char *str);
  *		   if there is no such string
  */
 extern const char *find_string(const char *str);
+
+#endif
 

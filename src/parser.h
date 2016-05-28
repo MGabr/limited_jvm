@@ -1,3 +1,6 @@
+#ifndef PARSER_H
+#define PARSER_H
+
 #include <stdint.h>
 
 typedef uint8_t u1;
@@ -214,4 +217,5 @@ struct ClassFile {
 
 extern struct ClassFile *parse(const char *filename);
 
+#endif
 
