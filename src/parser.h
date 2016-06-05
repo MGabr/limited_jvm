@@ -31,6 +31,8 @@ typedef uint32_t u4;
 #define RESOLVED_Utf8 (0x11)
 #define RESOLVED_Unicode (0x12)
 
+#define IS_RESOLVED(cp, index) (cp[index].tag & 0x10)
+
 #define ACC_PUBLIC (0x0001)
 #define ACC_PRIVATE (0x0002)
 #define ACC_PROTECTED (0x0004)
@@ -47,6 +49,13 @@ typedef uint32_t u4;
 struct cp_info {
 	u1 tag;
 	union {
+		// since all 'resolved' structs only have a pointer member,
+		// this struct can be used to access this pointer without knowing
+		// the type of resolved constant used.
+		struct {
+			void *ptr;
+		} r_any_info;
+
 		struct {
 			u2 name_index;
 		} class_info;

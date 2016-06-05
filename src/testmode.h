@@ -1,8 +1,11 @@
 #ifndef TESTMODE_H
 #define TESTMODE_H
 
+#include "parser.h"
+
 /**
- * If _TESTMODE_ is defined, the vm regulary hands over control to a test_hook.
+ * If _TESTMODE_ is defined, the vm terminates after a specified number of 
+ * instructions and saves its state in a global variable.
  * Comment this out during normal execution of the vm.
  */
 #define _TESTMODE_
@@ -11,25 +14,25 @@ struct state {
 	u1 *pc;
 	struct cp_info *cp;
 	void *frame;
-	u1 *optop;
+	u4 *optop;
 };
 
 /**
- * A test function that gets called after a certain number of instructions has
- * been executed.
- *
- * @detail instrs_until_test_hook specify the number of instructions after which
- *	   the test function will be called.
- *
- * @param the current state of the vm
+ * The global variable in which the start state of the vm is saved.
  */
-extern void (*test_hook)(struct state *);
+extern struct state start_state;
+
+/**
+ * The global variable in which the state of the vm is saved.
+ */
+extern struct state state;
 
 /**
  * Specifies the number of instructions after which the test function will be 
- * called
+ * called. If this is set to 0 (= uninitialized), the vm is not terminated 
+ * prematurely.
  */
-extern int instrs_until_test_hook;
+extern int instrs_until_terminate;
 
 /**
  * Counter to count the number of instructions that have been executed.

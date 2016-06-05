@@ -1,11 +1,11 @@
-FLAGS=-Wall -I $GTEST_HOME/include -L $GTEST_HOME/lib -lgtest -lgtest_main -lpthread
+FLAGS=-Wall -m32 -I $GTEST_HOME/include -L $GTEST_HOME/lib -lgtest -lgtest_main -lpthread
 LIBS=-I $GTEST_HOME/include -L $GTEST_HOME/lib -lgtest -lgtest_main -lpthread
 GTEST_HOME=~/usr/gtest
 
 all:
 	make Tests
 
-Tests: ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o
+Tests: ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o
 	make ParserTest.o
 	make StringPoolTest.o
 	make StringPoolConflictTest.o
@@ -26,19 +26,28 @@ StringPoolConflictTest.o:
 ../src/string_pool.o:
 	cd ../src && make string_pool.o
 
-../src/optons.o:
+../src/options.o:
 	cd ../src && make options.o
 
-MainTest.o:
+MainTest.o: HelloWorld.class
 	g++ ${FLAGS} -c MainTest.cpp ${LIBS}
 
 ../src/core.o:
 	cd ../src && make core.o
+
+../src/resolve.o:
+	cd ../src && make resolve.o
+
+LdcTest.o: HelloWorld.class
+	g++ ${FLAGS} -c LdcTest.cpp ${LIBS}
+
+../src/testmode.o:
+	cd ../src && make testmode.o
 
 HelloWorld.class:
 	cd java && javac HelloWorld.java && mv $@ ../classes/.
 
 
 clean:
-	rm classes/* Tests ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o ../src/parser.o ../src/string_pool.o ../src/options.o
+	rm classes/* Tests ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o
 

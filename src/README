@@ -1,0 +1,3 @@
+compiled as 32-bit from 64-bit ubuntu, using:
+gcc-multilib
+g++-multilib (for tests)
