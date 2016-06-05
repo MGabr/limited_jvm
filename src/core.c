@@ -129,6 +129,14 @@ void run(struct ClassFile *c, u1 *startCode)
 		pc++;
 		NEXT();
 	ldc2:
+		;
+		u2 index = ((u2) *pc) << sizeof(u1) * 8 | *(pc + 1);
+		if (!IS_RESOLVED(cp, index)) {
+			resolve_const(cp, index);
+		}
+		*++optop = (u4) cp[index].r_any_info.ptr;
+		pc += 2;
+		NEXT();
 	ldc2w:
 
 	aload:
