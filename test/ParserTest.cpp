@@ -9,7 +9,7 @@ extern "C" {
 class ParserTest : public ::testing::Test {
 	protected:
 	static void SetUpTestCase() {
-		cf = parse("classes/HelloWorld.class");
+		cf = parse("classes/HelloWorld");
 	}
 	
 	static struct ClassFile *cf;
@@ -102,10 +102,10 @@ TEST_F(ParserTest, NoFields) {
 
 
 TEST_F(ParserTest, ConstructorMethod) {
-	struct method_info m0 = ParserTest::cf->methods[0];
+	struct r_method_info m0 = ParserTest::cf->methods[0];
 	EXPECT_EQ(ACC_PUBLIC, m0.access_flags);
-	EXPECT_EQ(6, m0.name_index);
-	EXPECT_EQ(7, m0.signature_index);
+	EXPECT_STREQ("<init>", m0.name);
+	EXPECT_STREQ("()V", m0.signature);
 	EXPECT_EQ(1, m0.attributes_count);
 }
 
@@ -134,4 +134,13 @@ TEST_F(ParserTest, SingleSourcecodeAttribute) {
 	EXPECT_EQ(1, ParserTest::cf->attributes_count);
 	EXPECT_EQ(14, ParserTest::cf->attributes[0].attribute_name_index);
 }
+
+TEST_F(ParserTest, Name) {
+	EXPECT_STREQ("HelloWorld", ParserTest::cf->name);
+}
+
+TEST_F(ParserTest, NextShouldPointToItself) {
+	EXPECT_EQ(ParserTest::cf, ParserTest::cf->next);
+}
+
 

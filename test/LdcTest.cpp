@@ -11,7 +11,7 @@ class LdcTest : public ::testing::Test {
 
 	protected:
 	virtual void SetUp() {
-		cf = parse("classes/HelloWorld.class");
+		cf = parse("classes/HelloWorld");
 	}
 
 	struct ClassFile *cf;
@@ -62,6 +62,5 @@ TEST_F(LdcTest, ldc2TwiceShouldPushResolved) {
 		(const char *) *(state.optop - 1));
 	EXPECT_STREQ("Hello, World", (const char *) *state.optop);
 }
-
 
 

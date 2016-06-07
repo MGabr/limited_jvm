@@ -43,20 +43,24 @@ goto *table[*pc++];
 	#define STATIC static
 #endif
 
+#define TWO_BYTE_INDEX(pc) (((u2) *pc) << sizeof(u1) * 8 | *(pc + 1))
 
-STATIC struct method_info *get_main_method(struct ClassFile *c)
+
+STATIC struct r_method_info *get_main_method(struct ClassFile *c)
 {
-	struct cp_info *cp = c->constant_pool;
 	int i;
-	struct method_info *mi;
+	struct r_method_info *mi;
 
 	const char *main_str = find_string("main");
+	const char *signature_str = find_string("([Ljava/lang/String;)V");
+	if (main_str == NULL || signature_str == NULL) {
+		fprintf(stderr, "Can not run program: No main method found (no main or signature string in string pool).\n");
+		exit(1);
+	}
 
 	for (i = 0; i < c->methods_count; i++) {
 		mi = &c->methods[i];
-		if (cp[mi->name_index].r_utf8_info.str == main_str 
-			&& !strcmp(cp[mi->signature_index].r_utf8_info.str,
-				"([Ljava/lang/String;)V")) {
+		if (mi->name == main_str && mi->signature == signature_str) {
 			break;
 		}
 	}
@@ -121,6 +125,7 @@ void run(struct ClassFile *c, u1 *startCode)
 
 	NEXT();
 
+	u2 index;
 	ldc1:
 		if (!IS_RESOLVED(cp, *pc)) {
 			resolve_const(cp, *pc);
@@ -129,8 +134,7 @@ void run(struct ClassFile *c, u1 *startCode)
 		pc++;
 		NEXT();
 	ldc2:
-		;
-		u2 index = ((u2) *pc) << sizeof(u1) * 8 | *(pc + 1);
+		index = TWO_BYTE_INDEX(pc);
 		if (!IS_RESOLVED(cp, index)) {
 			resolve_const(cp, index);
 		}
@@ -138,7 +142,12 @@ void run(struct ClassFile *c, u1 *startCode)
 		pc += 2;
 		NEXT();
 	ldc2w:
-
+		// TODO: TEST
+		index = TWO_BYTE_INDEX(pc);
+		*++optop = cp[index].longOrDouble_info.high_bytes;
+		*++optop = cp[index].longOrDouble_info.low_bytes;
+		pc += 2;
+		NEXT();
 	aload:
 	aload_0:
 	aload_1:
@@ -149,6 +158,7 @@ void run(struct ClassFile *c, u1 *startCode)
 
 	invokenonvirtual:
 	invokestatic:
+		index = TWO_BYTE_INDEX(pc); 
 
 	return;
 }

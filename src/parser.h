@@ -97,6 +97,14 @@ struct cp_info {
 		struct {
 			u4 bytes;
 		} float_info;
+
+		// this struct can be used to access the bytes of a long or double  
+		// without knowing the type (long or double).
+		struct {
+			u4 high_bytes;
+			u4 low_bytes;
+		} longOrDouble_info;
+
 		struct {
 			u4 high_bytes;
 			u4 low_bytes;
@@ -110,7 +118,10 @@ struct cp_info {
 			u2 name_index;
 			u2 signature_index;
 		} nameAndType_info;
-		// TODO: RESOLVED_NameAndType_info
+		struct {
+			const char *name_str;
+			const char *signature_str;
+		} r_nameAndType_info;
 
 		// Utf8_info is resolved while parsing, so there is no utf8_info struct
 		// Utf8 currently not supported, Strings interpreted as ASCII
@@ -135,10 +146,10 @@ struct field_info {
 	struct attribute_info *attributes;
 };
 
-struct method_info {
+struct r_method_info {
 	u2 access_flags;
-	u2 name_index;
-	u2 signature_index;
+	const char *name;
+	const char *signature;
 	u2 attributes_count;
 	struct attribute_info *attributes;
 };
@@ -219,9 +230,12 @@ struct ClassFile {
 	u2 fields_count;
 	struct field_info *fields;
 	u2 methods_count;
-	struct method_info *methods;
+	struct r_method_info *methods;
 	u2 attributes_count;
 	struct attribute_info *attributes;
+
+	const char *name;
+	struct ClassFile *next;
 };
 
 extern struct ClassFile *parse(const char *filename);

@@ -196,11 +196,17 @@ static void parse_field(struct field_info *f, struct cp_info *cp, FILE *fp)
 	}
 }
 
-static void parse_method(struct method_info *m, struct cp_info *cp, FILE *fp)
+static void parse_method(struct r_method_info *m, struct cp_info *cp, FILE *fp)
 {
 	read_e16(&m->access_flags, fp);
-	read_e16(&m->name_index, fp);
-	read_e16(&m->signature_index, fp);
+
+	// resolve name and signature
+	u2 name_index;
+	u2 signature_index;
+	read_e16(&name_index, fp);
+	read_e16(&signature_index, fp);
+	m->name = cp[name_index].r_utf8_info.str;
+	m->signature = cp[signature_index].r_utf8_info.str;
 	
 	read_e16(&m->attributes_count, fp);
 	m->attributes = malloc(
@@ -245,7 +251,7 @@ static void parse_fields(struct ClassFile *cf, FILE *fp)
 static void parse_methods(struct ClassFile *cf, FILE *fp)
 {
 	read_e16(&cf->methods_count, fp);
-	cf->methods = malloc(sizeof(struct method_info) * cf->methods_count);
+	cf->methods = malloc(sizeof(struct r_method_info) * cf->methods_count);
 	int i;
 	for (i = 0; i < cf->methods_count; i++) {
 		parse_method(&cf->methods[i], cf->constant_pool, fp);
@@ -265,7 +271,11 @@ static void parse_attributes(struct ClassFile *cf, FILE *fp)
 
 struct ClassFile *parse(const char *filename)
 {
-	FILE *fp = fopen(filename, "r");
+	char *full_filename = malloc(strlen(filename) + strlen(".class") + 1);
+	strcpy(full_filename, filename);
+	strcat(full_filename, ".class");
+	FILE *fp = fopen(full_filename, "r");
+
 	struct ClassFile *cf = malloc(sizeof(struct ClassFile));
 
 	fread(&cf->magic, sizeof(u4), 1, fp);
@@ -294,6 +304,15 @@ struct ClassFile *parse(const char *filename)
 	parse_methods(cf, fp);
 
 	parse_attributes(cf, fp);
+
+	const char *filename_wo_path = strrchr(filename, '/');
+	if (filename_wo_path == NULL) {
+		filename_wo_path = filename;
+	} else {
+		filename_wo_path += sizeof(char);
+	}
+	cf->name = add_string(filename_wo_path);
+	cf->next = cf; // cyclic list
 
 	return cf;
 }
