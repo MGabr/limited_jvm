@@ -7,6 +7,7 @@ all:
 	make testmode.o
 	make core.o
 	make resolve.o
+	make signature.o
 
 parser.o:
 	gcc ${FLAGS} -c parser.c
@@ -26,6 +27,9 @@ testmode.o:
 resolve.o:
 	gcc ${FLAGS} -c resolve.c
 
+signature.o:
+	gcc ${FLAGS} -c signature.c
+
 clean:
-	rm parser.o string_pool.o options.o core.o testmode.o resolve.o
+	rm parser.o string_pool.o options.o core.o testmode.o resolve.o signature.o
 

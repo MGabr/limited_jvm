@@ -5,7 +5,7 @@ GTEST_HOME=~/usr/gtest
 all:
 	make Tests
 
-Tests: ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o
+Tests: ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o SignatureTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o ../src/signature.o
 	make ParserTest.o
 	make StringPoolTest.o
 	make StringPoolConflictTest.o
@@ -44,10 +44,16 @@ LdcTest.o: HelloWorld.class
 ../src/testmode.o:
 	cd ../src && make testmode.o
 
+SignatureTest.o:
+	g++ ${FLAGS} -c SignatureTest.cpp ${LIBS}
+
+../src/signature.o:
+	cd ../src && make signature.o
+
 HelloWorld.class:
 	cd java && javac HelloWorld.java && mv $@ ../classes/.
 
 
 clean:
-	rm classes/* Tests ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o
+	rm classes/* Tests ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o SignatureTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o ../src/signature.o
 
