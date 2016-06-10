@@ -99,7 +99,7 @@ void run(struct ClassFile *c, u1 *startCode)
 	// argn
 	// oldframe
 	// oldpc
-	// oldcp	<- optop (if no operand is on the operand stack)
+	// oldc	<- optop (if no operand is on the operand stack)
 	//
 
 	pc = startCode;
@@ -128,7 +128,7 @@ void run(struct ClassFile *c, u1 *startCode)
 	u2 index;
 	ldc1:
 		if (!IS_RESOLVED(cp, *pc)) {
-			resolve_const(cp, *pc);
+			resolve_const(c, *pc);
 		}
 		*++optop = (u4) cp[*pc].r_any_info.ptr;
 		pc++;
@@ -136,7 +136,7 @@ void run(struct ClassFile *c, u1 *startCode)
 	ldc2:
 		index = TWO_BYTE_INDEX(pc);
 		if (!IS_RESOLVED(cp, index)) {
-			resolve_const(cp, index);
+			resolve_const(c, index);
 		}
 		*++optop = (u4) cp[index].r_any_info.ptr;
 		pc += 2;
@@ -159,7 +159,7 @@ void run(struct ClassFile *c, u1 *startCode)
 	invokenonvirtual:
 	invokestatic:
 		index = TWO_BYTE_INDEX(pc); 
-
+		// needs cp, code and argc
 	return;
 }
 

@@ -88,6 +88,7 @@ TEST_F(ParserTest, NameAndTypeConstant) {
 	ASSERT_EQ(CONSTANT_NameAndType, cp16.tag);
 	EXPECT_EQ(6, cp16.nameAndType_info.name_index);
 	EXPECT_EQ(7, cp16.nameAndType_info.signature_index);
+	EXPECT_STREQ("()V", ParserTest::cf->constant_pool[cp16.nameAndType_info.signature_index].r_utf8_info.str);
 }
 
 

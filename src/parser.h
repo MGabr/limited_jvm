@@ -45,6 +45,10 @@ typedef uint32_t u4;
 #define ACC_INTERFACE (0x0200)
 #define ACC_ABSTRACT (0x0400)
 
+struct r_methodref_info {
+	struct ClassFile *r_class; // cp?
+	struct r_method_info *r_method;
+};
 
 struct cp_info {
 	u1 tag;
@@ -73,10 +77,7 @@ struct cp_info {
 			u2 class_index;
 			u2 name_and_type_index;
 		} methodref_info;
-		struct {
-			struct ClassFile *r_class; // cp?
-			struct r_method_info *r_method;
-		} r_methodref_info;
+		struct r_methodref_info r_methodref_info;
 
 		struct {
 			u2 class_index;
