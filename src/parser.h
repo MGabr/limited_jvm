@@ -74,8 +74,8 @@ struct cp_info {
 			u2 name_and_type_index;
 		} methodref_info;
 		struct {
-			struct ClassFile *r_class;
-			u1 *r_code;
+			struct ClassFile *r_class; // cp?
+			struct r_method_info *r_method;
 		} r_methodref_info;
 
 		struct {
@@ -150,6 +150,7 @@ struct r_method_info {
 	u2 access_flags;
 	const char *name;
 	const char *signature;
+	u1 nargs;
 	u2 attributes_count;
 	struct attribute_info *attributes;
 };

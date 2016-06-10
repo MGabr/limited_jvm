@@ -106,6 +106,7 @@ TEST_F(ParserTest, ConstructorMethod) {
 	EXPECT_EQ(ACC_PUBLIC, m0.access_flags);
 	EXPECT_STREQ("<init>", m0.name);
 	EXPECT_STREQ("()V", m0.signature);
+	EXPECT_EQ(0, m0.nargs);
 	EXPECT_EQ(1, m0.attributes_count);
 }
 

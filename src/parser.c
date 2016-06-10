@@ -5,6 +5,7 @@
 
 #include "parser.h"
 #include "string_pool.h"
+#include "signature.h"
 
 
 int little_endian = 0;
@@ -207,6 +208,8 @@ static void parse_method(struct r_method_info *m, struct cp_info *cp, FILE *fp)
 	read_e16(&signature_index, fp);
 	m->name = cp[name_index].r_utf8_info.str;
 	m->signature = cp[signature_index].r_utf8_info.str;
+
+	m->nargs = calculate_nargs(m->signature);
 	
 	read_e16(&m->attributes_count, fp);
 	m->attributes = malloc(
