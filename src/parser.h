@@ -152,6 +152,7 @@ struct r_method_info {
 	const char *name;
 	const char *signature;
 	u1 nargs;
+	struct Code_attribute *c_attr; // shortcut to code attribute
 	u2 attributes_count;
 	struct attribute_info *attributes;
 };
@@ -161,7 +162,6 @@ struct ConstantValue_attribute {
 };
 
 struct Code_attribute {
-	// extra field args_number, filled with signature
 	u2 max_stack;
 	u2 max_locals;
 	u4 code_length;

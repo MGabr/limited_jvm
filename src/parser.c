@@ -131,6 +131,13 @@ static void parse_ConstantValue_attribute(struct ConstantValue_attribute *cv,
 	read_e16(&cv->sourcefile_index, fp);
 }
 
+// global variable used to set the c_attr shortcut in r_method_info 
+// to the next parsed code_attribute
+//
+// parse_method sets this variable to the adress of the c_attr pointer
+// parse_Code_attribute writes its adress to this adress
+struct Code_attribute **c_attr_to_set = NULL;
+
 // cyclic calls between parse_attribute and parse_Code_attribute
 static void parse_attribute(struct attribute_info *att, struct cp_info *cp, 
 	FILE *fp);
@@ -138,6 +145,11 @@ static void parse_attribute(struct attribute_info *att, struct cp_info *cp,
 static void parse_Code_attribute(struct Code_attribute *code,struct cp_info *cp,
 	FILE *fp)
 {
+	// set c_attr of the last method
+	if (c_attr_to_set != NULL) {
+		*c_attr_to_set = code;
+	}
+
 	read_e16(&code->max_stack, fp);
 	read_e16(&code->max_locals, fp);
 
@@ -210,6 +222,9 @@ static void parse_method(struct r_method_info *m, struct cp_info *cp, FILE *fp)
 	m->signature = cp[signature_index].r_utf8_info.str;
 
 	m->nargs = calculate_nargs(m->signature);
+
+	// will be set in the next parse_Code_attribute
+	c_attr_to_set = &m->c_attr;
 	
 	read_e16(&m->attributes_count, fp);
 	m->attributes = malloc(

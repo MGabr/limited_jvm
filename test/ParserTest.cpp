@@ -145,4 +145,11 @@ TEST_F(ParserTest, NextShouldPointToItself) {
 	EXPECT_EQ(ParserTest::cf, ParserTest::cf->next);
 }
 
+TEST_F(ParserTest, ConstructorMethodCAttr) {
+	// first attribute is code attribute
+	struct Code_attribute *c_attr 
+		= &ParserTest::cf->methods[0].attributes[0].code_attribute;
+
+	EXPECT_EQ(c_attr, ParserTest::cf->methods[0].c_attr);
+}
 
