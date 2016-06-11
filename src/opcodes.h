@@ -9,4 +9,5 @@
 #define RETURN (177)
 #define INVOKENONVIRTUAL (183)
 #define INVOKESTATIC (184)
+#define IMPDEP1 (254)
 

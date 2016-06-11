@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <byteswap.h>
 #include <string.h>
+#include <errno.h>
 
 #include "parser.h"
 #include "string_pool.h"
@@ -293,6 +294,11 @@ struct ClassFile *parse(const char *filename)
 	strcpy(full_filename, filename);
 	strcat(full_filename, ".class");
 	FILE *fp = fopen(full_filename, "r");
+	if (fp == NULL) {
+		printf("Error while trying to load class %s: %s\n",
+			full_filename, strerror(errno));
+		exit(1);
+	}
 
 	struct ClassFile *cf = malloc(sizeof(struct ClassFile));
 

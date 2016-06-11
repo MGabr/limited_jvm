@@ -12,7 +12,7 @@
  */
 u1 calculate_nargs(const char *signature)
 {
-    int nargs = 0;
+    u1 nargs = 0;
 
 	int inClassPart = 0;
 	int inArrayPart = 0;

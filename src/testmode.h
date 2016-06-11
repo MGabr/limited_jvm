@@ -12,9 +12,11 @@
 
 struct state {
 	u1 *pc;
+	struct ClassFile *c;
 	struct cp_info *cp;
-	void *frame;
+	u4 *frame;
 	u4 *optop;
+	u4 localc;
 };
 
 /**

@@ -101,6 +101,9 @@ TEST_F(ParserTest, NoFields) {
 	EXPECT_EQ(0, ParserTest::cf->fields_count);
 }
 
+TEST_F(ParserTest, ThreeMethods) {
+	EXPECT_EQ(3, ParserTest::cf->methods_count);
+}
 
 TEST_F(ParserTest, ConstructorMethod) {
 	struct r_method_info m0 = ParserTest::cf->methods[0];
