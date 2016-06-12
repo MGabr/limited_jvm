@@ -5,7 +5,7 @@ GTEST_HOME=~/usr/gtest
 all:
 	make Tests
 
-Tests: ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o SignatureTest.o ResolveTest.o InvokestaticTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o ../src/signature.o
+Tests: ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o SignatureTest.o ResolveTest.o InvokestaticTest.o NativeTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o ../src/signature.o ../src/native.o
 	make ParserTest.o
 	make StringPoolTest.o
 	make StringPoolConflictTest.o
@@ -62,6 +62,12 @@ InvokestaticTest.o: InvokestaticTest.class
 InvokestaticTest.class:
 	cd java && javac InvokestaticTest.java && mv $@ ../classes/.
 
+NativeTest.o: HelloWorld.class
+	g++ ${FLAGS} -c NativeTest.cpp ${LIBS}
+
+../src/native.o:
+	cd ../src && make native.o
+
 clean:
-	rm classes/* Tests ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o SignatureTest.o ResolveTest.o InvokestaticTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o ../src/signature.o
+	rm classes/* Tests ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o SignatureTest.o ResolveTest.o InvokestaticTest.o NativeTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o ../src/signature.o ../src/native.o
 

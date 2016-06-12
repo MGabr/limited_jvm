@@ -8,6 +8,7 @@ all:
 	make core.o
 	make resolve.o
 	make signature.o
+	make native.o
 
 parser.o:
 	gcc ${FLAGS} -c parser.c
@@ -30,6 +31,9 @@ resolve.o:
 signature.o:
 	gcc ${FLAGS} -c signature.c
 
+native.o:
+	gcc ${FLAGS} -c native.c
+
 clean:
-	rm parser.o string_pool.o options.o core.o testmode.o resolve.o signature.o
+	rm parser.o string_pool.o options.o core.o testmode.o resolve.o signature.o native.o
 
