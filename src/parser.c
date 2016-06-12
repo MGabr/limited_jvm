@@ -191,7 +191,7 @@ static void parse_attribute(struct attribute_info *att, struct cp_info *cp,
 		parse_Code_attribute(&att->code_attribute, cp, fp);
 	} else {
 		// other attributes currently not supported
-		fprintf(stderr, "Attribute %s currently not supported. Will be ignored.\n", att_name); 
+		// fprintf(stderr, "Attribute %s currently not supported. Will be ignored.\n", att_name); 
 		fseek(fp, att->attribute_length, SEEK_CUR);
 	}
 }

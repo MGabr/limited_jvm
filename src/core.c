@@ -9,6 +9,7 @@
 #include "string_pool.h"
 #include "resolve.h"
 #include "opcodes.h"
+#include "native.h"
 
 /* ======================= TESTMODE PART ========================= */
 
@@ -35,8 +36,6 @@ if (instrs_counter == 0) {\
 }\
 instrs_counter++;\
 goto *table[*pc++];
-
-	#define STATIC 
 #endif
 
 /* =============================================================== */
@@ -44,13 +43,12 @@ goto *table[*pc++];
 
 #ifndef _TESTMODE_
 	#define NEXT() goto *table[*pc++];
-	#define STATIC static
 #endif
 
 #define TWO_BYTE_INDEX(pc) (((u2) *pc) << sizeof(u1) * 8 | *(pc + 1))
 
 
-STATIC struct r_method_info *get_main_method(struct ClassFile *c)
+struct r_method_info *get_main_method(struct ClassFile *c)
 {
 	int i;
 	struct r_method_info *mi;
@@ -128,8 +126,13 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	localc = main->c_attr->max_locals;
 
 	// TODO: put input String array in local variable
-	// set oldpc to opcode used for exiting vm
-	*((u1 *) frame + localc + 2) = IMPDEP1;
+	// set oldpc to pointer to opcode used for exiting vm
+	u1 impdep1_store = IMPDEP1;
+	*((u1 **) frame + localc + 2) = &impdep1_store;
+	// set oldc to current class 
+	// (to prevent segmentation fault when receiving c->constant_pool in last
+	// return)
+	*((struct ClassFile **) frame + localc + 3) = c;
 	// other old values are not needed here
 
 
@@ -149,6 +152,9 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[INVOKESTATIC] = &&invokestatic;
 	table[IMPDEP1] = &&impdep1;
 
+	
+	// initialize set of predefined native method
+	init_natives();
 
 	// ------------- execute instructions ---------------------------
 
@@ -209,6 +215,11 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		struct r_methodref_info *m = &cp[index].r_methodref_info;
 		struct r_method_info *m_block = m->r_method;
 		struct Code_attribute *c_attr = m_block->c_attr;
+
+		if (IS_NATIVE(m_block)) {
+			call_native(m_block, optop);
+			NEXT();
+		}
 
 		tmp_frame = optop + 1 - m_block->nargs;
 

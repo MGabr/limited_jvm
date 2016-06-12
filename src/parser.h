@@ -45,6 +45,8 @@ typedef uint32_t u4;
 #define ACC_INTERFACE (0x0200)
 #define ACC_ABSTRACT (0x0400)
 
+#define IS_NATIVE(method) (method->access_flags & ACC_NATIVE)
+
 struct r_methodref_info {
 	struct ClassFile *r_class; // cp?
 	struct r_method_info *r_method;
