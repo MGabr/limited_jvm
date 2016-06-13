@@ -139,6 +139,12 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	//  ------------ opcode table -----------------------------------
 
 	void *table[255];
+	table[ICONST_0] = &&iconst_0;
+	table[ICONST_1] = &&iconst_1;
+	table[ICONST_2] = &&iconst_2;
+	table[ICONST_3] = &&iconst_3;
+	table[ICONST_4] = &&iconst_4;
+	table[ICONST_5] = &&iconst_5;
 	table[LDC1] = &&ldc1;
 	table[LDC2] = &&ldc2;
 	table[LDC2W] = &&ldc2w;
@@ -156,6 +162,10 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	// initialize set of predefined native method
 	init_natives();
 
+#ifdef _TESTMODE_
+	init_testmode();
+#endif
+
 	// ------------- execute instructions ---------------------------
 
 	NEXT();
@@ -164,6 +174,25 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	// NOT used for side effects over different goto blocks
 	u2 index;
 	u4 *tmp_frame;
+
+	iconst_0:
+		*++optop = 0;
+		NEXT();
+	iconst_1:
+		*++optop = 1;
+		NEXT();
+	iconst_2:
+		*++optop = 2;
+		NEXT();
+	iconst_3:
+		*++optop = 3;
+		NEXT();
+	iconst_4:
+		*++optop = 4;
+		NEXT();
+	iconst_5:
+		*++optop = 5;
+		NEXT();
 
 	ldc1:
 		if (!IS_RESOLVED(cp, *pc)) {

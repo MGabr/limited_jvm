@@ -8,3 +8,7 @@ int instrs_until_terminate;
 
 int instrs_counter;
 
+void init_testmode(void) {
+	instrs_counter = 0;
+}
+

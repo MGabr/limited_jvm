@@ -42,5 +42,10 @@ extern int instrs_until_terminate;
  */
 extern int instrs_counter;
 
+/**
+ * Initializes the test mode.
+ */
+void init_testmode(void);
+
 #endif
 
