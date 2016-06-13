@@ -145,6 +145,8 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[ICONST_3] = &&iconst_3;
 	table[ICONST_4] = &&iconst_4;
 	table[ICONST_5] = &&iconst_5;
+	table[BIPUSH] = &&bipush;
+	table[SIPUSH] = &&sipush;
 	table[LDC1] = &&ldc1;
 	table[LDC2] = &&ldc2;
 	table[LDC2W] = &&ldc2w;
@@ -194,6 +196,13 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		*++optop = 5;
 		NEXT();
 
+	bipush:
+		*++optop = *pc++;
+		NEXT();
+	sipush:
+		*++optop = TWO_BYTE_INDEX(pc);
+		pc += 2;
+		NEXT();
 	ldc1:
 		if (!IS_RESOLVED(cp, *pc)) {
 			resolve_const(c, *pc);

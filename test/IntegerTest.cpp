@@ -80,4 +80,20 @@ TEST_F(IntegerTest, iconst5) {
 };
 
 
+TEST_F(IntegerTest, bipushWithVal6) {
+	u1 code[1] = {BIPUSH};
+	instrs_until_terminate = 1;
+	run(IntegerTest::cf, getMethodWithCodeOffset(4));
+
+	EXPECT_EQ(6, *state.optop);
+};
+
+TEST_F(IntegerTest, sipushWithVal257) {
+	u1 code[1] = {SIPUSH};
+	instrs_until_terminate = 1;
+	run(IntegerTest::cf, getMethodWithCodeOffset(7));
+
+	EXPECT_EQ(257, *state.optop);
+};
+
 
