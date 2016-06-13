@@ -31,6 +31,12 @@ typedef uint32_t u4;
 #define RESOLVED_Utf8 (0x11)
 #define RESOLVED_Unicode (0x12)
 
+// resolved by default
+#define RESOLVED_Integer (0x13)
+#define RESOLVED_Float (0x14)
+#define RESOLVED_Long (0x15)
+#define RESOLVED_Double (0x16)
+
 #define IS_RESOLVED(cp, index) (cp[index].tag & 0x10)
 
 #define ACC_PUBLIC (0x0001)

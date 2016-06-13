@@ -150,11 +150,21 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[LDC1] = &&ldc1;
 	table[LDC2] = &&ldc2;
 	table[LDC2W] = &&ldc2w;
+	table[ILOAD] = &&iload;
 	table[ALOAD] = &&aload;
+	table[ILOAD_0] = &&iload_0;
+	table[ILOAD_1] = &&iload_1;
+	table[ILOAD_2] = &&iload_2;
+	table[ILOAD_3] = &&iload_3;
 	table[ALOAD_0] = &&aload_0;
 	table[ALOAD_1] = &&aload_1;
 	table[ALOAD_2] = &&aload_2;
 	table[ALOAD_3] = &&aload_3;
+	table[ISTORE] = &&istore;
+	table[ISTORE_0] = &&istore_0;
+	table[ISTORE_1] = &&istore_1;
+	table[ISTORE_2] = &&istore_2;
+	table[ISTORE_3] = &&istore_3;
 	table[RETURN] = &&_return;
 	table[INVOKENONVIRTUAL] = &&invokenonvirtual;
 	table[INVOKESTATIC] = &&invokestatic;
@@ -203,6 +213,39 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		*++optop = TWO_BYTE_INDEX(pc);
 		pc += 2;
 		NEXT();
+
+	iload:
+		*++optop = *(frame + *pc++);
+		NEXT();
+	iload_0:
+		*++optop = *frame;
+		NEXT();
+	iload_1:
+		*++optop = *(frame + 1);
+		NEXT();
+	iload_2:
+		*++optop = *(frame + 2);
+		NEXT();
+	iload_3:
+		*++optop = *(frame + 3);
+		NEXT();
+
+	istore:
+		*(frame + *pc++) = *optop--;
+		NEXT();
+	istore_0:
+		*frame = *optop--;
+		NEXT();
+	istore_1:
+		*(frame + 1) = *optop--;
+		NEXT();
+	istore_2:
+		*(frame + 2) = *optop--;
+		NEXT();
+	istore_3:
+		*(frame + 3) = *optop--;
+		NEXT();
+
 	ldc1:
 		if (!IS_RESOLVED(cp, *pc)) {
 			resolve_const(c, *pc);

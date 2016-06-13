@@ -80,14 +80,22 @@ static void parse_constant(struct cp_info *cp, FILE *fp)
 			read_e16(&cp->string_info.string_index, fp);
 			break;
 		case CONSTANT_Integer:
+			cp->tag = RESOLVED_Integer; // resolved by default
 			read_e32(&cp->integer_info.bytes, fp);
 			break;
 		case CONSTANT_Float:
+			cp->tag = RESOLVED_Float; // resolved by default
 			read_e32(&cp->float_info.bytes, fp);
 			break;
 		case CONSTANT_Long:
+			cp->tag = RESOLVED_Long; // resolved by default
 			read_e32(&cp->long_info.high_bytes, fp);
 			read_e32(&cp->long_info.low_bytes, fp);
+			break;
+		case CONSTANT_Double:
+			cp->tag = RESOLVED_Double; // resolved by default
+			read_e32(&cp->double_info.high_bytes, fp);
+			read_e32(&cp->double_info.low_bytes, fp);
 			break;
 		case CONSTANT_NameAndType:
 			read_e16(&cp->nameAndType_info.name_index, fp);
