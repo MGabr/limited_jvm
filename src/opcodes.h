@@ -42,6 +42,8 @@
 
 #define IREM (112)
 
+#define INEG (116)
+
 #define IINC (132)
 
 #define RETURN (177)

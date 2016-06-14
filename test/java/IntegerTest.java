@@ -23,12 +23,8 @@ public class IntegerTest {
 		c = -a;
 
 		d = ++a;
-		d = a++;
-		d = a;
 
 		e = --b;
-		e = b--;
-		e = b;
 	}
 
 }

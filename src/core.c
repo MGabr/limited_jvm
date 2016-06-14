@@ -165,6 +165,13 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[ISTORE_1] = &&istore_1;
 	table[ISTORE_2] = &&istore_2;
 	table[ISTORE_3] = &&istore_3;
+	table[IADD] = &&iadd;
+	table[ISUB] = &&isub;
+	table[IMUL] = &&imul;
+	table[IDIV] = &&idiv;
+	table[IREM] = &&irem;
+	table[INEG] = &&ineg;
+	table[IINC] = &&iinc;
 	table[RETURN] = &&_return;
 	table[INVOKENONVIRTUAL] = &&invokenonvirtual;
 	table[INVOKESTATIC] = &&invokestatic;
@@ -244,6 +251,49 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		NEXT();
 	istore_3:
 		*(frame + 3) = *optop--;
+		NEXT();
+
+	iadd:
+		optop--;
+		*optop = *optop + *(optop + 1);
+		NEXT();
+
+	isub:
+		optop--;
+		*optop = *optop - *(optop + 1);
+		NEXT();
+
+	imul:
+		optop--;
+		*optop = *optop * *(optop + 1);
+		NEXT();
+
+	idiv:
+		if (*optop == 0) {
+			fprintf(stderr, "ArithmeticException: / by zero\n");
+			exit(1);
+		}
+		optop--;
+		*optop = *optop / *(optop + 1);
+		NEXT();
+
+	irem:
+		// TODO: extra tests for special cases
+		optop--;
+		if (*optop == 0) {
+			fprintf(stderr, "ArithmeticException: %% by zero\n");
+		}
+		// remainder instead of modulo like in c %-operator
+		*optop = *optop - (*optop / *(optop + 1)) * *(optop + 1);
+		NEXT();
+
+	ineg:
+		*optop = -*optop;
+		NEXT();
+
+	iinc:
+		*(frame + *pc) += *((i1 *) pc + 1);
+		pc += 2;
 		NEXT();
 
 	ldc1:
