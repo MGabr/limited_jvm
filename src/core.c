@@ -121,9 +121,9 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	pc = main->c_attr->code;
 	cp = c->constant_pool;
 	frame = allocate_stack();
-	optop = frame + 4;
-
 	localc = main->c_attr->max_locals;
+	optop = frame + localc + 3;
+
 
 	// TODO: put input String array in local variable
 	// set oldpc to pointer to opcode used for exiting vm
@@ -214,10 +214,10 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		NEXT();
 
 	bipush:
-		*++optop = *pc++;
+		*++optop = (i1) *pc++;
 		NEXT();
 	sipush:
-		*++optop = TWO_BYTE_INDEX(pc);
+		*++optop = (i2) TWO_BYTE_INDEX(pc);
 		pc += 2;
 		NEXT();
 
@@ -255,17 +255,17 @@ void run(struct ClassFile *c, struct r_method_info *main)
 
 	iadd:
 		optop--;
-		*optop = *optop + *(optop + 1);
+		*optop = (i4) *optop + (i4) *(optop + 1);
 		NEXT();
 
 	isub:
 		optop--;
-		*optop = *optop - *(optop + 1);
+		*optop = (i4) *optop - (i4) *(optop + 1);
 		NEXT();
 
 	imul:
 		optop--;
-		*optop = *optop * *(optop + 1);
+		*optop = (i4) *optop * (i4) *(optop + 1);
 		NEXT();
 
 	idiv:
@@ -274,7 +274,7 @@ void run(struct ClassFile *c, struct r_method_info *main)
 			exit(1);
 		}
 		optop--;
-		*optop = *optop / *(optop + 1);
+		*optop =  (i4) *optop / (i4) *(optop + 1);
 		NEXT();
 
 	irem:
@@ -284,15 +284,16 @@ void run(struct ClassFile *c, struct r_method_info *main)
 			fprintf(stderr, "ArithmeticException: %% by zero\n");
 		}
 		// remainder instead of modulo like in c %-operator
-		*optop = *optop - (*optop / *(optop + 1)) * *(optop + 1);
+		*optop = (i4) *optop - 
+			((i4) *optop / (i4) *(optop + 1)) * (i4) *(optop + 1);
 		NEXT();
 
 	ineg:
-		*optop = -*optop;
+		*optop = - (i4) *optop;
 		NEXT();
 
 	iinc:
-		*(frame + *pc) += *((i1 *) pc + 1);
+		*(frame + *pc) += (i1) *(pc + 1);
 		pc += 2;
 		NEXT();
 
