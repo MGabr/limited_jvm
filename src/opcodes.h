@@ -44,6 +44,18 @@
 
 #define INEG (116)
 
+#define ISHL (120)
+
+#define ISHR (122)
+
+#define IUSHR (124)
+
+#define IAND (126)
+
+#define IOR (128)
+
+#define IXOR (130)
+
 #define IINC (132)
 
 #define RETURN (177)

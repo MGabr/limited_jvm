@@ -171,6 +171,12 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[IDIV] = &&idiv;
 	table[IREM] = &&irem;
 	table[INEG] = &&ineg;
+	table[ISHL] = &&ishl;
+	table[ISHR] = &&ishr;
+	table[IUSHR] = &&iushr;
+	table[IAND] = &&iand;
+	table[IOR] = &&ior;
+	table[IXOR] = &&ixor;
 	table[IINC] = &&iinc;
 	table[RETURN] = &&_return;
 	table[INVOKENONVIRTUAL] = &&invokenonvirtual;
@@ -290,6 +296,41 @@ void run(struct ClassFile *c, struct r_method_info *main)
 
 	ineg:
 		*optop = - (i4) *optop;
+		NEXT();
+
+	ishl:
+		// TODO: is this the right arithmetic shift?
+		optop--;
+		// only the 5 lowest-order bits are used for shift
+		*optop <<= (*(optop + 1) & 0x1f);
+		NEXT();
+
+	ishr:
+		optop--;
+		// only the 5 lowest-order bits are used for shift
+		// TODO: arithmetic shift not portable
+		*((i4 *) optop) >>= (*(optop + 1) & 0x1f);
+		NEXT();
+
+	iushr:
+		optop--;
+		// only the 5 lowest-order bits are used for shift
+		*optop >>= (*(optop + 1) & 0x1f);
+		NEXT();
+
+	iand:
+		optop--;
+		*optop &= *(optop + 1);
+		NEXT();
+
+	ior:
+		optop--;
+		*optop |= *(optop + 1);
+		NEXT();
+
+	ixor:
+		optop--;
+		*optop ^= *(optop + 1);
 		NEXT();
 
 	iinc:
