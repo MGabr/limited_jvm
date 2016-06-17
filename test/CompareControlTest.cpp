@@ -103,6 +103,7 @@ TEST_F(CompareControlTest, ificmpgtFalse) {
 	EXPECT_EQ(start_state.pc + 101, state.pc);
 };
 
+
 TEST_F(CompareControlTest, ificmpleEqual) {
 	instrs_until_terminate = 56;
 	run(CompareControlTest::cf, getMethod());

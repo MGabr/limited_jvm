@@ -4,6 +4,7 @@
 #include "parser.h"
 #include "core.h"
 #include "testmode.h"
+#include "warn.h"
 
 
 #ifdef _TESTMODE_
@@ -18,6 +19,8 @@ void java(int argc, const char **argv) {
 		fprintf(stderr, "Usage: java <class file name>\n");
 		exit(1);
 	}
+
+	print_portability_warnings();
 
 	struct ClassFile *cf = parse(argv[1]);
 	struct r_method_info *main_m = get_main_method(cf);

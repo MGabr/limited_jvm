@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <math.h>
 
 #include "parser.h"
 #include "options.h"
@@ -146,32 +147,51 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[ICONST_3] = &&iconst_3;
 	table[ICONST_4] = &&iconst_4;
 	table[ICONST_5] = &&iconst_5;
+	table[FCONST_0] = &&fconst_0;
+	table[FCONST_1] = &&fconst_1;
+	table[FCONST_2] = &&fconst_2;
 	table[BIPUSH] = &&bipush;
 	table[SIPUSH] = &&sipush;
 	table[LDC1] = &&ldc1;
 	table[LDC2] = &&ldc2;
 	table[LDC2W] = &&ldc2w;
 	table[ILOAD] = &&iload;
+	table[FLOAD] = &&fload;
 	table[ALOAD] = &&aload;
 	table[ILOAD_0] = &&iload_0;
 	table[ILOAD_1] = &&iload_1;
 	table[ILOAD_2] = &&iload_2;
 	table[ILOAD_3] = &&iload_3;
+	table[FLOAD_0] = &&fload_0;
+	table[FLOAD_1] = &&fload_1;
+	table[FLOAD_2] = &&fload_2;
+	table[FLOAD_3] = &&fload_3;
 	table[ALOAD_0] = &&aload_0;
 	table[ALOAD_1] = &&aload_1;
 	table[ALOAD_2] = &&aload_2;
 	table[ALOAD_3] = &&aload_3;
 	table[ISTORE] = &&istore;
+	table[FSTORE] = &&fstore;
 	table[ISTORE_0] = &&istore_0;
 	table[ISTORE_1] = &&istore_1;
 	table[ISTORE_2] = &&istore_2;
 	table[ISTORE_3] = &&istore_3;
+	table[FSTORE_0] = &&fstore_0;
+	table[FSTORE_1] = &&fstore_1;
+	table[FSTORE_2] = &&fstore_2;
+	table[FSTORE_3] = &&fstore_3;
 	table[IADD] = &&iadd;
+	table[FADD] = &&fadd;
 	table[ISUB] = &&isub;
+	table[FSUB] = &&fsub;
 	table[IMUL] = &&imul;
+	table[FMUL] = &&fmul;
 	table[IDIV] = &&idiv;
+	table[FDIV] = &&fdiv;
 	table[IREM] = &&irem;
+	table[FREM] = &&frem;
 	table[INEG] = &&ineg;
+	table[FNEG] = &&fneg;
 	table[ISHL] = &&ishl;
 	table[ISHR] = &&ishr;
 	table[IUSHR] = &&iushr;
@@ -237,6 +257,16 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		*++optop = 5;
 		NEXT();
 
+	fconst_0:
+		*((float *) ++optop) = 0.0f;
+		NEXT();
+	fconst_1:
+		*((float *) ++optop) = 1.0f;
+		NEXT();
+	fconst_2:
+		*((float *) ++optop) = 2.0f;
+		NEXT();
+
 	bipush:
 		*++optop = (i1) *pc++;
 		NEXT();
@@ -249,7 +279,7 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		if (!IS_RESOLVED(cp, *pc)) {
 			resolve_const(c, *pc);
 		}
-		*++optop = (u4) cp[*pc].r_any_info.ptr;
+		*((void **) ++optop) = cp[*pc].r_any_info.ptr;
 		pc++;
 		NEXT();
 	ldc2:
@@ -271,6 +301,13 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	iload:
 		*++optop = *(frame + *pc++);
 		NEXT();
+
+	fload:
+		*++optop = *(frame + *pc++);
+		NEXT();	
+
+	aload:
+	
 	iload_0:
 		*++optop = *frame;
 		NEXT();
@@ -284,7 +321,19 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		*++optop = *(frame + 3);
 		NEXT();
 
-	aload:
+	fload_0:
+		*++optop = *frame;
+		NEXT();
+	fload_1:
+		*++optop = *(frame + 1);
+		NEXT();
+	fload_2:
+		*++optop = *(frame + 2);
+		NEXT();
+	fload_3:
+		*++optop = *(frame + 3);
+		NEXT();
+
 	aload_0:
 	aload_1:
 	aload_2:
@@ -293,6 +342,11 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	istore:
 		*(frame + *pc++) = *optop--;
 		NEXT();
+
+	fstore:
+		*(frame + *pc++) = *optop--;
+		NEXT();
+
 	istore_0:
 		*frame = *optop--;
 		NEXT();
@@ -306,9 +360,27 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		*(frame + 3) = *optop--;
 		NEXT();
 
+	fstore_0:
+		*frame = *optop--;
+		NEXT();
+	fstore_1:
+		*(frame + 1) = *optop--;
+		NEXT();
+	fstore_2:
+		*(frame + 2) = *optop--;
+		NEXT();
+	fstore_3:
+		*(frame + 3) = *optop--;
+		NEXT();
+
 	iadd:
 		optop--;
 		*optop = (i4) *optop + (i4) *(optop + 1);
+		NEXT();
+
+	fadd:
+		optop--;
+		*((float *) optop) = *((float *) optop) + *((float *) optop + 1);
 		NEXT();
 
 	isub:
@@ -316,9 +388,19 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		*optop = (i4) *optop - (i4) *(optop + 1);
 		NEXT();
 
+	fsub:
+		optop--;
+		*((float *) optop) = *((float *) optop) - *((float *) optop + 1);
+		NEXT();
+
 	imul:
 		optop--;
 		*optop = (i4) *optop * (i4) *(optop + 1);
+		NEXT();
+
+	fmul:
+		optop--;
+		*((float *) optop) = *((float *) optop) * *((float *) optop + 1);
 		NEXT();
 
 	idiv:
@@ -327,22 +409,52 @@ void run(struct ClassFile *c, struct r_method_info *main)
 			exit(1);
 		}
 		optop--;
-		*optop =  (i4) *optop / (i4) *(optop + 1);
+		*optop = (i4) *optop / (i4) *(optop + 1);
+		NEXT();
+
+	fdiv:
+		optop--;
+		// TODO: correct floating point arithmetic implementation in C
+		*((float *) optop) = *((float *) optop) / *((float *) optop + 1);
 		NEXT();
 
 	irem:
 		// TODO: extra tests for special cases
-		optop--;
 		if (*optop == 0) {
 			fprintf(stderr, "ArithmeticException: %% by zero\n");
 		}
+		optop--;
 		// remainder instead of modulo like in c %-operator
 		*optop = (i4) *optop - 
 			((i4) *optop / (i4) *(optop + 1)) * (i4) *(optop + 1);
 		NEXT();
 
+	frem:
+		if (*((float *) optop) == NAN || *((float *) optop - 1) == NAN
+			|| *((float *) optop) == 0 || *((float *) optop - 1) == INFINITY) {
+			printf("1\n");
+			optop--;
+			*((float *) optop) = NAN;
+			NEXT();
+		}
+		if (*((float *) optop) == INFINITY || *((float *) optop - 1) == 0) {
+			printf("2\n");
+			optop--; // dividend is the result
+			NEXT();
+		}
+		optop--;
+		// remainder instead of modulo like in c %-operator
+		*((float *) optop) = *((float *) optop) -
+			(((i4) (*((float *) optop) / *((float *) optop + 1)))
+				* *((float *) optop + 1));
+		NEXT();
+
 	ineg:
 		*optop = - (i4) *optop;
+		NEXT();
+
+	fneg:
+		*((float *) optop) = - *((float *) optop);
 		NEXT();
 
 	ishl:
@@ -433,7 +545,6 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		}
 		optop--;
 		NEXT();
-	// TODO: test
 	if_icmpeq:
 		if (*(optop - 1) == *optop) {
 			pc += TWO_BYTE_INDEX(pc) - 1;

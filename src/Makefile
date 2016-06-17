@@ -3,7 +3,7 @@ FLAGS=-Wall -m32
 all:
 	make java
 
-java: parser.o string_pool.o options.o testmode.o core.o resolve.o signature.o native.o java.o
+java: parser.o string_pool.o options.o testmode.o core.o resolve.o signature.o native.o java.o warn.o
 	gcc ${FLAGS} -o $@ $^
 
 parser.o:
@@ -33,6 +33,9 @@ native.o:
 java.o:
 	gcc ${FLAGS} -c java.c
 
+warn.o:
+	gcc ${FLAGS} -c warn.c
+
 clean:
-	rm parser.o string_pool.o options.o core.o testmode.o resolve.o signature.o native.o java.o java
+	rm parser.o string_pool.o options.o core.o testmode.o resolve.o signature.o native.o java.o warn.o java
 
