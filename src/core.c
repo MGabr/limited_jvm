@@ -436,44 +436,50 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	// TODO: test
 	if_icmpeq:
 		if (*(optop - 1) == *optop) {
-			pc += TWO_BYTE_INDEX(pc);
+			pc += TWO_BYTE_INDEX(pc) - 1;
+		} else {
+			pc += 2;
 		}
-		pc += 2;
 		optop -= 2;
 		NEXT();
 	if_icmpne:
 		if (*(optop - 1) != *optop) {
-			pc += TWO_BYTE_INDEX(pc);
+			pc += TWO_BYTE_INDEX(pc) - 1;
+		} else {
+			pc += 2;
 		}
-		pc += 2;
 		optop -= 2;
 		NEXT();
 	if_icmplt:
-		if (*(optop - 1) < *optop) {
-			pc += TWO_BYTE_INDEX(pc);
+		if ((i4) *(optop - 1) < (i4) *optop) {
+			pc += TWO_BYTE_INDEX(pc) - 1;
+		} else {
+			pc += 2;
 		}
-		pc += 2;
 		optop -= 2;
 		NEXT();
 	if_icmpge:
-		if (*(optop - 1) >= *optop) {
-			pc += TWO_BYTE_INDEX(pc);
+		if ((i4) *(optop - 1) >= (i4) *optop) {
+			pc += TWO_BYTE_INDEX(pc) - 1;
+		} else {
+			pc += 2;
 		}
-		pc += 2;
 		optop -= 2;
 		NEXT();
 	if_icmpgt:
-		if (*(optop - 1) > *optop) {
-			pc += TWO_BYTE_INDEX(pc);
+		if ((i4) *(optop - 1) > (i4) *optop) {
+			pc += TWO_BYTE_INDEX(pc) - 1;
+		} else {
+			pc += 2;
 		}
-		pc += 2;
 		optop -= 2;
 		NEXT();
 	if_icmple:
-		if (*(optop - 1) <= *optop) {
-			pc += TWO_BYTE_INDEX(pc);
+		if ((i4) *(optop - 1) <= (i4) *optop) {
+			pc += TWO_BYTE_INDEX(pc) - 1;
+		} else {
+			pc += 2;
 		}
-		pc += 2;
 		optop -= 2;
 		NEXT();
 
