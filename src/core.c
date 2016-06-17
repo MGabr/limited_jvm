@@ -139,6 +139,7 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	//  ------------ opcode table -----------------------------------
 
 	void *table[255];
+	table[ICONST_M1] = &&iconst_m1;
 	table[ICONST_0] = &&iconst_0;
 	table[ICONST_1] = &&iconst_1;
 	table[ICONST_2] = &&iconst_2;
@@ -178,6 +179,19 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[IOR] = &&ior;
 	table[IXOR] = &&ixor;
 	table[IINC] = &&iinc;
+	table[IFEQ] = &&ifeq;
+	table[IFNE] = &&ifne;
+	table[IFLT] = &&iflt;
+	table[IFGE] = &&ifge;
+	table[IFGT] = &&ifgt;
+	table[IFLE] = &&ifle;
+	table[IF_ICMPEQ] = &&if_icmpeq;
+	table[IF_ICMPNE] = &&if_icmpne;
+	table[IF_ICMPLT] = &&if_icmplt;
+	table[IF_ICMPGE] = &&if_icmpge;
+	table[IF_ICMPGT] = &&if_icmpgt;
+	table[IF_ICMPLE] = &&if_icmple;
+	table[GOTO] = &&_goto;
 	table[RETURN] = &&_return;
 	table[INVOKENONVIRTUAL] = &&invokenonvirtual;
 	table[INVOKESTATIC] = &&invokestatic;
@@ -200,6 +214,10 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	u2 index;
 	u4 *tmp_frame;
 
+	iconst_m1:
+		// TODO: test
+		*++optop = -1;
+		NEXT();
 	iconst_0:
 		*++optop = 0;
 		NEXT();
@@ -227,6 +245,29 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		pc += 2;
 		NEXT();
 
+	ldc1:
+		if (!IS_RESOLVED(cp, *pc)) {
+			resolve_const(c, *pc);
+		}
+		*++optop = (u4) cp[*pc].r_any_info.ptr;
+		pc++;
+		NEXT();
+	ldc2:
+		index = TWO_BYTE_INDEX(pc);
+		if (!IS_RESOLVED(cp, index)) {
+			resolve_const(c, index);
+		}
+		*++optop = (u4) cp[index].r_any_info.ptr;
+		pc += 2;
+		NEXT();
+	ldc2w:
+		// TODO: TEST
+		index = TWO_BYTE_INDEX(pc);
+		*++optop = cp[index].longOrDouble_info.high_bytes;
+		*++optop = cp[index].longOrDouble_info.low_bytes;
+		pc += 2;
+		NEXT();
+
 	iload:
 		*++optop = *(frame + *pc++);
 		NEXT();
@@ -242,6 +283,12 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	iload_3:
 		*++optop = *(frame + 3);
 		NEXT();
+
+	aload:
+	aload_0:
+	aload_1:
+	aload_2:
+	aload_3:
 
 	istore:
 		*(frame + *pc++) = *optop--;
@@ -338,33 +385,101 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		pc += 2;
 		NEXT();
 
-	ldc1:
-		if (!IS_RESOLVED(cp, *pc)) {
-			resolve_const(c, *pc);
+	ifeq:
+		if (*optop == 0) {
+			pc += TWO_BYTE_INDEX(pc) - 1;
+		} else {
+			pc += 2;
 		}
-		*++optop = (u4) cp[*pc].r_any_info.ptr;
-		pc++;
+		optop--;
 		NEXT();
-	ldc2:
-		index = TWO_BYTE_INDEX(pc);
-		if (!IS_RESOLVED(cp, index)) {
-			resolve_const(c, index);
+	ifne:
+		if (*optop != 0) {
+			pc += TWO_BYTE_INDEX(pc) - 1;
+		} else {
+			pc += 2;
 		}
-		*++optop = (u4) cp[index].r_any_info.ptr;
-		pc += 2;
+		optop--;
 		NEXT();
-	ldc2w:
-		// TODO: TEST
-		index = TWO_BYTE_INDEX(pc);
-		*++optop = cp[index].longOrDouble_info.high_bytes;
-		*++optop = cp[index].longOrDouble_info.low_bytes;
-		pc += 2;
+	iflt:
+		if ((i4) *optop < 0) {
+			pc += TWO_BYTE_INDEX(pc) - 1;
+		} else {
+			pc += 2;
+		}
+		optop--;
 		NEXT();
-	aload:
-	aload_0:
-	aload_1:
-	aload_2:
-	aload_3:
+	ifge:
+		if ((i4) *optop >= 0) {
+			pc += TWO_BYTE_INDEX(pc) - 1;
+		} else {
+			pc += 2;
+		}
+		optop--;
+		NEXT();
+	ifgt:
+		if ((i4) *optop > 0) {
+			pc += TWO_BYTE_INDEX(pc) - 1;
+		} else {
+			pc += 2;
+		}
+		optop--;
+		NEXT();
+	ifle:
+		if ((i4) *optop <= 0) {
+			pc += TWO_BYTE_INDEX(pc) - 1;
+		} else {
+			pc += 2;
+		}
+		optop--;
+		NEXT();
+	// TODO: test
+	if_icmpeq:
+		if (*(optop - 1) == *optop) {
+			pc += TWO_BYTE_INDEX(pc);
+		}
+		pc += 2;
+		optop -= 2;
+		NEXT();
+	if_icmpne:
+		if (*(optop - 1) != *optop) {
+			pc += TWO_BYTE_INDEX(pc);
+		}
+		pc += 2;
+		optop -= 2;
+		NEXT();
+	if_icmplt:
+		if (*(optop - 1) < *optop) {
+			pc += TWO_BYTE_INDEX(pc);
+		}
+		pc += 2;
+		optop -= 2;
+		NEXT();
+	if_icmpge:
+		if (*(optop - 1) >= *optop) {
+			pc += TWO_BYTE_INDEX(pc);
+		}
+		pc += 2;
+		optop -= 2;
+		NEXT();
+	if_icmpgt:
+		if (*(optop - 1) > *optop) {
+			pc += TWO_BYTE_INDEX(pc);
+		}
+		pc += 2;
+		optop -= 2;
+		NEXT();
+	if_icmple:
+		if (*(optop - 1) <= *optop) {
+			pc += TWO_BYTE_INDEX(pc);
+		}
+		pc += 2;
+		optop -= 2;
+		NEXT();
+
+	_goto:
+		pc += TWO_BYTE_INDEX(pc);
+		NEXT();
 
 	_return:
 		tmp_frame = frame;

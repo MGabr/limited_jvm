@@ -1,3 +1,4 @@
+#define ICONST_M1 (2)
 #define ICONST_0 (3)
 #define ICONST_1 (4)
 #define ICONST_2 (5)
@@ -57,6 +58,21 @@
 #define IXOR (130)
 
 #define IINC (132)
+
+#define IFEQ (153)
+#define IFNE (154)
+#define IFLT (155)
+#define IFGE (156)
+#define IFGT (157)
+#define IFLE (158)
+#define IF_ICMPEQ (159)
+#define IF_ICMPNE (160)
+#define IF_ICMPLT (161)
+#define IF_ICMPGE (162)
+#define IF_ICMPGT (163)
+#define IF_ICMPLE (164)
+
+#define GOTO (167)
 
 #define RETURN (177)
 
