@@ -150,6 +150,8 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[FCONST_0] = &&fconst_0;
 	table[FCONST_1] = &&fconst_1;
 	table[FCONST_2] = &&fconst_2;
+	table[DCONST_0] = &&dconst_0;
+	table[DCONST_1] = &&dconst_1;
 	table[BIPUSH] = &&bipush;
 	table[SIPUSH] = &&sipush;
 	table[LDC1] = &&ldc1;
@@ -157,6 +159,7 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[LDC2W] = &&ldc2w;
 	table[ILOAD] = &&iload;
 	table[FLOAD] = &&fload;
+	table[DLOAD] = &&dload;
 	table[ALOAD] = &&aload;
 	table[ILOAD_0] = &&iload_0;
 	table[ILOAD_1] = &&iload_1;
@@ -166,12 +169,17 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[FLOAD_1] = &&fload_1;
 	table[FLOAD_2] = &&fload_2;
 	table[FLOAD_3] = &&fload_3;
+	table[DLOAD_0] = &&dload_0;
+	table[DLOAD_1] = &&dload_1;
+	table[DLOAD_2] = &&dload_2;
+	table[DLOAD_3] = &&dload_3;
 	table[ALOAD_0] = &&aload_0;
 	table[ALOAD_1] = &&aload_1;
 	table[ALOAD_2] = &&aload_2;
 	table[ALOAD_3] = &&aload_3;
 	table[ISTORE] = &&istore;
 	table[FSTORE] = &&fstore;
+	table[DSTORE] = &&dstore;
 	table[ISTORE_0] = &&istore_0;
 	table[ISTORE_1] = &&istore_1;
 	table[ISTORE_2] = &&istore_2;
@@ -180,18 +188,28 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[FSTORE_1] = &&fstore_1;
 	table[FSTORE_2] = &&fstore_2;
 	table[FSTORE_3] = &&fstore_3;
+	table[DSTORE_0] = &&dstore_0;
+	table[DSTORE_1] = &&dstore_1;
+	table[DSTORE_2] = &&dstore_2;
+	table[DSTORE_3] = &&dstore_3;
 	table[IADD] = &&iadd;
 	table[FADD] = &&fadd;
+	table[DADD] = &&dadd;
 	table[ISUB] = &&isub;
 	table[FSUB] = &&fsub;
+	table[DSUB] = &&dsub;
 	table[IMUL] = &&imul;
 	table[FMUL] = &&fmul;
+	table[DMUL] = &&dmul;
 	table[IDIV] = &&idiv;
 	table[FDIV] = &&fdiv;
+	table[DDIV] = &&ddiv;
 	table[IREM] = &&irem;
 	table[FREM] = &&frem;
+	table[DREM] = &&drem;
 	table[INEG] = &&ineg;
 	table[FNEG] = &&fneg;
+	table[DNEG] = &&dneg;
 	table[ISHL] = &&ishl;
 	table[ISHR] = &&ishr;
 	table[IUSHR] = &&iushr;
@@ -266,7 +284,12 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	fconst_2:
 		*((float *) ++optop) = 2.0f;
 		NEXT();
-
+	dconst_0:
+		*((double *) ++optop) = 0.0;
+		NEXT();
+	dconst_1:
+		*((double *) ++optop) = 1.0; 
+		NEXT();
 	bipush:
 		*++optop = (i1) *pc++;
 		NEXT();
@@ -293,8 +316,8 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	ldc2w:
 		// TODO: TEST
 		index = TWO_BYTE_INDEX(pc);
-		*++optop = cp[index].longOrDouble_info.high_bytes;
-		*++optop = cp[index].longOrDouble_info.low_bytes;
+		*((u8 *) ++optop) = *((u8 *) &cp[index].longOrDouble_info.first_bytes);
+		++optop;
 		pc += 2;
 		NEXT();
 
@@ -305,9 +328,10 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	fload:
 		*++optop = *(frame + *pc++);
 		NEXT();	
-
+	dload:
+		*((double *) ++optop) = *((double *) (frame + *pc++));
+		NEXT();
 	aload:
-	
 	iload_0:
 		*++optop = *frame;
 		NEXT();
@@ -333,7 +357,22 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	fload_3:
 		*++optop = *(frame + 3);
 		NEXT();
-
+	dload_0:
+		*((double *) (++optop)) = *((double *) frame);
+		optop++;
+		NEXT();
+	dload_1:
+		*((double *) (++optop)) = *((double *) (frame + 1));
+		optop++;
+		NEXT();
+	dload_2:
+		*((double *) (++optop)) = *((double *) (frame + 2));
+		optop++;
+		NEXT();
+	dload_3:
+		*((double *) (++optop)) = *((double *) (frame + 3));
+		optop++;
+		NEXT();
 	aload_0:
 	aload_1:
 	aload_2:
@@ -345,6 +384,10 @@ void run(struct ClassFile *c, struct r_method_info *main)
 
 	fstore:
 		*(frame + *pc++) = *optop--;
+		NEXT();
+	dstore:
+		*((double *) (frame + *pc++)) = *((double *) (optop - 1));
+		optop -= 2;
 		NEXT();
 
 	istore_0:
@@ -372,6 +415,22 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	fstore_3:
 		*(frame + 3) = *optop--;
 		NEXT();
+	dstore_0:
+		*((double *) frame) = *((double *) (optop - 1));
+		optop -= 2;
+		NEXT();
+	dstore_1:
+		*((double *) (frame + 1)) = *((double *) (optop - 1));
+		optop -= 2;
+		NEXT();
+	dstore_2:
+		*((double *) (frame + 2)) = *((double *) (optop - 1));
+		optop -= 2;
+		NEXT();
+	dstore_3:
+		*((double *) (frame + 3)) = *((double *) (optop - 1));
+		optop -= 2;
+		NEXT();
 
 	iadd:
 		optop--;
@@ -382,7 +441,11 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		optop--;
 		*((float *) optop) = *((float *) optop) + *((float *) optop + 1);
 		NEXT();
-
+	dadd:
+		optop -= 2;
+		*((double *) (optop - 1))
+			= *((double *) (optop - 1)) + *((double *) (optop + 1));
+		NEXT();
 	isub:
 		optop--;
 		*optop = (i4) *optop - (i4) *(optop + 1);
@@ -392,7 +455,11 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		optop--;
 		*((float *) optop) = *((float *) optop) - *((float *) optop + 1);
 		NEXT();
-
+	dsub:
+		optop -= 2;
+		*((double *) (optop - 1))
+			= *((double *) (optop - 1)) - *((double *) (optop + 1));
+		NEXT();
 	imul:
 		optop--;
 		*optop = (i4) *optop * (i4) *(optop + 1);
@@ -402,7 +469,11 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		optop--;
 		*((float *) optop) = *((float *) optop) * *((float *) optop + 1);
 		NEXT();
-
+	dmul:
+		optop -= 2;
+		*((double *) (optop - 1))
+			= *((double *) (optop - 1)) * *((double *) (optop + 1));
+		NEXT();
 	idiv:
 		if (*optop == 0) {
 			fprintf(stderr, "ArithmeticException: / by zero\n");
@@ -417,11 +488,17 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		// TODO: correct floating point arithmetic implementation in C
 		*((float *) optop) = *((float *) optop) / *((float *) optop + 1);
 		NEXT();
-
+	ddiv:
+		optop -= 2;
+		// TODO: correct floating point arithmetic implementation in C
+		*((double *) (optop - 1))
+			= *((double *) (optop - 1)) / *((double *) (optop + 1));
+		NEXT();
 	irem:
 		// TODO: extra tests for special cases
 		if (*optop == 0) {
 			fprintf(stderr, "ArithmeticException: %% by zero\n");
+			exit(1);
 		}
 		optop--;
 		// remainder instead of modulo like in c %-operator
@@ -432,23 +509,36 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	frem:
 		if (*((float *) optop) == NAN || *((float *) optop - 1) == NAN
 			|| *((float *) optop) == 0 || *((float *) optop - 1) == INFINITY) {
-			printf("1\n");
 			optop--;
 			*((float *) optop) = NAN;
 			NEXT();
 		}
 		if (*((float *) optop) == INFINITY || *((float *) optop - 1) == 0) {
-			printf("2\n");
 			optop--; // dividend is the result
 			NEXT();
 		}
 		optop--;
-		// remainder instead of modulo like in c %-operator
 		*((float *) optop) = *((float *) optop) -
 			(((i4) (*((float *) optop) / *((float *) optop + 1)))
 				* *((float *) optop + 1));
 		NEXT();
-
+	drem:
+		optop -= 2;
+		if (*((double *) (optop - 1)) == NAN 
+			|| *((double *) (optop + 1)) == NAN
+			|| *((double *) (optop - 1)) == INFINITY
+			|| *((double *) (optop + 1)) == 0) {
+			*((float *) optop) = NAN;
+			NEXT();
+		}
+		if (*((double *) (optop - 1)) == 0 
+			|| *((double *) (optop + 1)) == INFINITY) {
+			NEXT(); // dividend is the result
+		}
+		*((double *) (optop - 1)) = *((double *) (optop - 1)) -
+			(((i8) (*((double *) (optop - 1)) / *((double *) (optop + 1))))
+				* *((double *) (optop + 1)));
+		NEXT();
 	ineg:
 		*optop = - (i4) *optop;
 		NEXT();
@@ -456,7 +546,9 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	fneg:
 		*((float *) optop) = - *((float *) optop);
 		NEXT();
-
+	dneg:
+		*((double *) (optop - 1)) = - *((double *) (optop - 1));
+		NEXT();
 	ishl:
 		// TODO: is this the right arithmetic shift?
 		optop--;

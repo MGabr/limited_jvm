@@ -6,10 +6,12 @@
 typedef uint8_t u1;
 typedef uint16_t u2;
 typedef uint32_t u4;
+typedef uint64_t u8;
 
 typedef int8_t i1;
 typedef int16_t i2;
 typedef int32_t i4;
+typedef int64_t i8;
 
 #define MAGIC (0xCAFEBABE)
 
@@ -114,17 +116,20 @@ struct cp_info {
 		// this struct can be used to access the bytes of a long or double  
 		// without knowing the type (long or double).
 		struct {
-			u4 high_bytes;
-			u4 low_bytes;
+			u4 first_bytes;
+			// u4 low_bytes; this field is saved right after the first byte 
+			// overwriting parts of the next cp entry
 		} longOrDouble_info;
 
 		struct {
-			u4 high_bytes;
-			u4 low_bytes;
+			u4 first_bytes;
+			// u4 low_bytes; this field is saved right after the first byte 
+			// overwriting parts of the next cp entry
 		} long_info;
 		struct {
-			u4 high_bytes;
-			u4 low_bytes;
+			u4 first_bytes;
+			// u4 low_bytes; this field is saved right after the first byte
+			// overwritign parts of the next cp entry
 		} double_info;
 
 		struct {

@@ -10,8 +10,8 @@
 #define FCONST_0 (11)
 #define FCONST_1 (12)
 #define FCONST_2 (13)
-
-
+#define DCONST_0 (14)
+#define DCONST_1 (15)
 #define BIPUSH (16)
 #define SIPUSH (17)
 #define LDC1 (18)
@@ -20,7 +20,7 @@
 #define ILOAD (21)
 
 #define FLOAD (23)
-
+#define DLOAD (24)
 #define ALOAD (25)
 #define ILOAD_0 (26)
 #define ILOAD_1 (27)
@@ -32,8 +32,10 @@
 #define FLOAD_1 (35)
 #define FLOAD_2 (36)
 #define FLOAD_3 (37)
-
-
+#define DLOAD_0 (38)
+#define DLOAD_1 (39)
+#define DLOAD_2 (40)
+#define DLOAD_3 (41)
 #define ALOAD_0 (42)
 #define ALOAD_1 (43)
 #define ALOAD_2 (44)
@@ -43,7 +45,7 @@
 #define ISTORE (54)
 
 #define FSTORE (56)
-
+#define DSTORE (57)
 
 #define ISTORE_0 (59)
 #define ISTORE_1 (60)
@@ -55,32 +57,36 @@
 #define FSTORE_1 (68)
 #define FSTORE_2 (69)
 #define FSTORE_3 (70)
+#define DSTORE_0 (71)
+#define DSTORE_1 (72)
+#define DSTORE_2 (73)
+#define DSTORE_3 (74)
 
 
 #define IADD (96)
 
 #define FADD (98)
-
+#define DADD (99)
 #define ISUB (100)
 
 #define FSUB (102)
-
+#define DSUB (103)
 #define IMUL (104)
 
 #define FMUL (106)
-
+#define DMUL (107)
 #define IDIV (108)
 
 #define FDIV (110)
-
+#define DDIV (111)
 #define IREM (112)
 
 #define FREM (114)
-
+#define DREM (115)
 #define INEG (116)
 
 #define FNEG (118)
-
+#define DNEG (119)
 #define ISHL (120)
 
 #define ISHR (122)

@@ -8,8 +8,7 @@
 #include "string_pool.h"
 #include "signature.h"
 
-
-int little_endian = 0;
+int little_endian = 1;
 
 /*Read a byte from a file into a buffer.
  *
@@ -57,8 +56,15 @@ static size_t read_e32(u4 *ptr, FILE *stream)
 	return ret;
 }
 
+static int second_double_or_long_part = 0;
+
 static void parse_constant(struct cp_info *cp, FILE *fp)
 {
+	if (second_double_or_long_part) {
+		second_double_or_long_part = 0;
+		return;
+	}
+
 	read_e8(&cp->tag, fp);
 	switch (cp->tag) {
 		case CONSTANT_Class:
@@ -89,13 +95,17 @@ static void parse_constant(struct cp_info *cp, FILE *fp)
 			break;
 		case CONSTANT_Long:
 			cp->tag = RESOLVED_Long; // resolved by default
-			read_e32(&cp->long_info.high_bytes, fp);
-			read_e32(&cp->long_info.low_bytes, fp);
+			// high bytes and low bytes swapped
+			read_e32(&cp->long_info.first_bytes + 1, fp);
+			read_e32(&cp->long_info.first_bytes, fp);
+			second_double_or_long_part = 1;
 			break;
 		case CONSTANT_Double:
 			cp->tag = RESOLVED_Double; // resolved by default
-			read_e32(&cp->double_info.high_bytes, fp);
-			read_e32(&cp->double_info.low_bytes, fp);
+			// high bytes and low bytes swapped
+			read_e32(&cp->double_info.first_bytes + 1, fp);
+			read_e32(&cp->double_info.first_bytes, fp);
+			second_double_or_long_part = 1;
 			break;
 		case CONSTANT_NameAndType:
 			read_e16(&cp->nameAndType_info.name_index, fp);
