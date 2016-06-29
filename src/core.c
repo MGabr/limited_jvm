@@ -87,7 +87,11 @@ static void *allocate_stack(void)
 }
 
 
-#define TWO_BYTE_INDEX(pc) (((u2) *pc) << sizeof(u1) * 8 | *(pc + 1))
+#define TWO_BYTE_INDEX(pc) (((u2) *pc) << 8 | *(pc + 1))
+#define FOUR_BYTE_INDEX(pc) ((i4) (((u4) *((u1 *) (pc))) << 24 \
+	| ((u4) *((u1 *) (pc) + 1)) << 16 \
+	| ((u4) *((u1 *) (pc) + 2)) << 8 \
+	| (u4) *((u1 *) (pc) + 3)))
 #define ISNAN(x) (x != x)
 
 #define GET_OLDLOCALC(frame, localc) (*((u4 *) frame + localc))
@@ -286,6 +290,8 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[IF_ICMPGT] = &&if_icmpgt;
 	table[IF_ICMPLE] = &&if_icmple;
 	table[GOTO] = &&_goto;
+	table[TABLESWITCH] = &&tableswitch;
+	table[LOOKUPSWITCH] = &&lookupswitch;
 	table[IRETURN] = &&ireturn;
 	table[LRETURN] = &&lreturn;
 	table[FRETURN] = &&freturn;
@@ -314,6 +320,9 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	// NOT used for side effects over different goto blocks
 	u2 index;
 	u4 *tmp_frame;
+	u4 def_offset_addr_i;
+	i4 *def_offset_addr;
+	i4 low;
 
 	nop:
 		// do nothing
@@ -321,25 +330,25 @@ void run(struct ClassFile *c, struct r_method_info *main)
 
 	iconst_m1:
 		// TODO: test
-		*++optop = -1;
+		*((i4 *) ++optop) = -1;
 		NEXT();
 	iconst_0:
-		*++optop = 0;
+		*((i4 *) ++optop) = 0;
 		NEXT();
 	iconst_1:
-		*++optop = 1;
+		*((i4 *) ++optop) = 1;
 		NEXT();
 	iconst_2:
-		*++optop = 2;
+		*((i4 *) ++optop) = 2;
 		NEXT();
 	iconst_3:
-		*++optop = 3;
+		*((i4 *) ++optop) = 3;
 		NEXT();
 	iconst_4:
-		*++optop = 4;
+		*((i4 *) ++optop) = 4;
 		NEXT();
 	iconst_5:
-		*++optop = 5;
+		*((i4 *) ++optop) = 5;
 		NEXT();
 	lconst_0:
 		*((u8 *) ++optop) = 0l;
@@ -838,7 +847,6 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		} else if (*((double *) (optop - 1)) <= INT64_MIN) {
 			*((i8 *) (optop - 1)) = INT64_MIN;
 		} else if (*((double *) (optop - 1)) >= INT64_MAX) {
-			printf("%f\n", *((double *) (optop - 1)));
 			*((i8 *) (optop - 1)) = INT64_MAX;
 		} else {
 			fesetround(FE_TOWARDZERO);
@@ -1018,6 +1026,73 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		pc += TWO_BYTE_INDEX(pc);
 		NEXT();
 
+	tableswitch:
+		def_offset_addr_i = (u4) pc;
+		while (def_offset_addr_i % 4 != 0) {
+			def_offset_addr_i++;
+		}
+		def_offset_addr = (i4 *) def_offset_addr_i;
+	
+		low = FOUR_BYTE_INDEX(def_offset_addr + 1);	
+		if (low < *((i4 *) optop) 
+			&& *((i4 *) optop) < FOUR_BYTE_INDEX(def_offset_addr + 2)) { // high
+
+			// lookup index (*optop - low) in table (def_offset_addr + 3)
+			pc += FOUR_BYTE_INDEX(
+				def_offset_addr + 3 + *((i4 *) optop) - low) - 1;
+		} else {
+			pc += FOUR_BYTE_INDEX(def_offset_addr) - 1;
+		}
+		optop--;
+		NEXT();
+	lookupswitch:
+		def_offset_addr_i = (u4) pc;
+		while (def_offset_addr_i % 4 != 0) {
+			def_offset_addr_i++;
+		}
+		def_offset_addr = (i4 *) def_offset_addr_i;
+
+		// binary search
+		i4 *switchtable = def_offset_addr + 2;
+		low = 0;
+		i4 high = FOUR_BYTE_INDEX(def_offset_addr + 1); // npairs
+		i4 middle = high / 2;
+
+		while (low < high) {
+			middle = low + (high - low) / 2;
+			// middle * 2 + 1 as index, because we only want the second part
+			// of the match - offset pairs
+			if (FOUR_BYTE_INDEX(switchtable + middle * 2) 
+					== *((i4 *) optop)) {
+				// found matching offset
+				pc += FOUR_BYTE_INDEX(switchtable + middle * 2 + 1) - 1;
+				optop--;
+				NEXT();
+			} else if (FOUR_BYTE_INDEX(switchtable + middle * 2)
+					 < *((i4 *) optop)) {
+				low = middle + 1;
+			} else {
+				high = middle - 1;
+			}
+		}
+
+		/*
+		// linear search
+		i4 npairs = FOUR_BYTE_INDEX(def_offset_addr + 1);
+		i4 *switchtable = def_offset_addr + 2;
+		i4 i;
+		for (i = 0; i < npairs; i++) {
+			if (FOUR_BYTE_INDEX(switchtable + i * 2) == *((i4 *) optop)) {
+				pc += FOUR_BYTE_INDEX(switchtable + i * 2 + 1) - 1;
+				NEXT();
+			}
+		}
+		*/
+
+		// no match, use default offset
+		pc += FOUR_BYTE_INDEX(def_offset_addr) - 1;
+		optop--;
+		NEXT();
 	ireturn:
 		tmp_frame = frame;
 		frame = GET_OLDFRAME(tmp_frame, localc);

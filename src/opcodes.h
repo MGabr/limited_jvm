@@ -154,8 +154,10 @@
 
 #define GOTO (167)
 
-// jsr and  switch
+// jsr
 
+#define TABLESWITCH (170)
+#define LOOKUPSWITCH (171)
 #define IRETURN (172)
 #define LRETURN (173)
 #define FRETURN (174)
