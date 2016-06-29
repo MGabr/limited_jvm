@@ -47,8 +47,6 @@ goto *table[*pc++];
 	#define NEXT() goto *table[*pc++];
 #endif
 
-#define TWO_BYTE_INDEX(pc) (((u2) *pc) << sizeof(u1) * 8 | *(pc + 1))
-
 
 struct r_method_info *get_main_method(struct ClassFile *c)
 {
@@ -88,6 +86,9 @@ static void *allocate_stack(void)
 	return stack;
 }
 
+
+#define TWO_BYTE_INDEX(pc) (((u2) *pc) << sizeof(u1) * 8 | *(pc + 1))
+#define ISNAN(x) (x != x)
 
 #define GET_OLDLOCALC(frame, localc) (*((u4 *) frame + localc))
 #define GET_OLDFRAME(frame, localc) (*((u4 **) frame + localc + 1))
@@ -267,6 +268,11 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[INT2BYTE] = &&int2byte;
 	table[INT2CHAR] = &&int2char;
 	table[INT2SHORT] = &&int2short;
+	table[LCMP] = &&lcmp;
+	table[FCMPL] = &&fcmpl;
+	table[FCMPG] = &&fcmpg;
+	table[DCMPL] = &&dcmpl;
+	table[DCMPG] = &&dcmpg;
 	table[IFEQ] = &&ifeq;
 	table[IFNE] = &&ifne;
 	table[IFLT] = &&iflt;
@@ -841,7 +847,64 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	int2short:
 		*((i4 *) optop) = (i4) *((i2 *) optop); // sign extension through cast
 		NEXT();
-
+	lcmp:
+		if (*((i8 *) (optop - 3)) > *((i8 *) (optop - 1))) {
+			*(optop - 3) = 1;
+		} else if (*((i8 *) (optop - 3)) < *((i8 *) (optop - 1))) {
+			*(optop - 3) = -1;
+		} else {
+			*(optop - 3) = 0;
+		}
+		optop -= 3;
+		NEXT();
+	fcmpl:
+		if (*((float *) (optop - 1)) > *((float *) optop)) {
+			*(optop - 1) = 1;
+		} else if (*((float *) (optop - 1)) < *((float *) optop)
+			|| ISNAN(*((float *) (optop - 1)))
+			|| ISNAN(*((float *) optop))) {
+			*(optop - 1) = -1;
+		} else {
+			*(optop - 1) = 0;
+		}
+		optop--;
+		NEXT();
+	fcmpg:
+		if (*((float *) (optop - 1)) > *((float *) optop)
+			|| ISNAN(*((float *) (optop - 1)))
+			|| ISNAN(*((float *) optop))) {
+			*(optop - 1) = 1;
+		} else if (*((float *) (optop - 1)) < *((float *) optop)) {
+			*(optop - 1) = -1;
+		} else {
+			*(optop - 1) = 0;
+		}
+		optop--;
+		NEXT();
+	dcmpl:
+		if (*((double *) (optop - 3)) > *((double *) (optop - 1))) {
+			*(optop - 3) = 1;
+		} else if (*((double *) (optop - 3)) < *((double *) (optop - 1))
+			|| ISNAN(*((double *) (optop - 3)))
+			|| ISNAN(*((double *) (optop - 1)))) {
+			*(optop - 3) = -1;
+		} else {
+			*(optop - 3) = 0;
+		}
+		optop -= 3;
+		NEXT();
+	dcmpg:
+		if (*((double *) (optop - 3)) > *((double *) (optop - 1))
+			|| ISNAN(*((double *) (optop - 3)))
+			|| ISNAN(*((double *) (optop - 1)))) {
+			*(optop - 3) = 1;
+		} else if (*((double *) (optop - 3)) < *((double *) (optop - 1))) {
+			*(optop - 3) = -1;
+		} else {
+			*(optop - 3) = 0;
+		}
+		optop -= 3;
+		NEXT();
 	ifeq:
 		if (*optop == 0) {
 			pc += TWO_BYTE_INDEX(pc) - 1;

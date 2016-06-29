@@ -132,9 +132,11 @@
 #define INT2BYTE (145)
 #define INT2CHAR (146)
 #define INT2SHORT (147)
-
-// comparisons with other types
-
+#define LCMP (148)
+#define FCMPL (149)
+#define FCMPG (150)
+#define DCMPL (151)
+#define DCMPG (152)
 #define IFEQ (153)
 #define IFNE (154)
 #define IFLT (155)
