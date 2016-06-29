@@ -1,3 +1,5 @@
+#define NOP (0)
+
 #define ICONST_M1 (2)
 #define ICONST_0 (3)
 #define ICONST_1 (4)
@@ -67,8 +69,17 @@
 #define DSTORE_2 (73)
 #define DSTORE_3 (74)
 
-// object and array store, stack operations
+// object and array store
 
+#define POP (87)
+#define POP2 (88)
+#define DUP (89)
+#define DUP_X1 (90)
+#define DUP_X2 (91)
+#define DUP2 (92)
+#define DUP2_X1 (93)
+#define DUP2_X2 (94)
+#define SWAP (95)
 #define IADD (96)
 #define LADD (97)
 #define FADD (98)
@@ -141,7 +152,12 @@
 
 #define GOTO (167)
 
-// jsr, switch and return statements
+// jsr and  switch
+
+#define IRETURN (172)
+#define LRETURN (173)
+#define FRETURN (174)
+#define DRETURN (175)
 
 #define RETURN (177)
 

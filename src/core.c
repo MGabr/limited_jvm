@@ -141,6 +141,7 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	//  ------------ opcode table -----------------------------------
 
 	void *table[255];
+	table[NOP] = &&nop;
 	table[ICONST_M1] = &&iconst_m1;
 	table[ICONST_0] = &&iconst_0;
 	table[ICONST_1] = &&iconst_1;
@@ -205,6 +206,15 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[DSTORE_1] = &&dstore_1;
 	table[DSTORE_2] = &&dstore_2;
 	table[DSTORE_3] = &&dstore_3;
+	table[POP] = &&pop;
+	table[POP2] = &&pop2;
+	table[DUP] = &&dup;
+	table[DUP_X1] = &&dup_x1;
+	table[DUP_X2] = &&dup_x2;
+	table[DUP2] = &&dup2;
+	table[DUP2_X1] = &&dup2_x1;
+	table[DUP2_X2] = &&dup2_x2;
+	table[SWAP] = &&swap;
 	table[IADD] = &&iadd;
 	table[LADD] = &&ladd;
 	table[FADD] = &&fadd;
@@ -270,6 +280,10 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[IF_ICMPGT] = &&if_icmpgt;
 	table[IF_ICMPLE] = &&if_icmple;
 	table[GOTO] = &&_goto;
+	table[IRETURN] = &&ireturn;
+	table[LRETURN] = &&lreturn;
+	table[FRETURN] = &&freturn;
+	table[DRETURN] = &&dreturn;
 	table[RETURN] = &&_return;
 	table[INVOKENONVIRTUAL] = &&invokenonvirtual;
 	table[INVOKESTATIC] = &&invokestatic;
@@ -294,6 +308,10 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	// NOT used for side effects over different goto blocks
 	u2 index;
 	u4 *tmp_frame;
+
+	nop:
+		// do nothing
+		NEXT();
 
 	iconst_m1:
 		// TODO: test
@@ -513,6 +531,26 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		optop -= 2;
 		NEXT();
 
+	pop:
+		optop--;
+		NEXT();
+	pop2:
+		optop -= 2;
+		NEXT();
+	dup:
+		// TODO: Implement
+	dup_x1:
+		// TODO: Implement
+	dup_x2:
+		// TODO: Implement
+	dup2:
+		// TODO: Implement
+	dup2_x1:
+		// TODO: Implement
+	dup2_x2:
+		// TODO: Implement
+	swap:
+		// TODO: Implement
 	iadd:
 		optop--;
 		*optop = (i4) *optop + (i4) *(optop + 1);
@@ -903,6 +941,61 @@ void run(struct ClassFile *c, struct r_method_info *main)
 
 	_goto:
 		pc += TWO_BYTE_INDEX(pc);
+		NEXT();
+
+	ireturn:
+		tmp_frame = frame;
+		frame = GET_OLDFRAME(tmp_frame, localc);
+		pc = GET_OLDPC(tmp_frame, localc);
+		c = GET_OLDC(tmp_frame, localc);
+		cp = c->constant_pool;
+
+		localc = GET_OLDLOCALC(tmp_frame, localc);
+
+		*tmp_frame = *optop; // return value
+		optop = tmp_frame;
+
+		NEXT();
+	lreturn:
+		tmp_frame = frame;
+		frame = GET_OLDFRAME(tmp_frame, localc);
+		pc = GET_OLDPC(tmp_frame, localc);
+		c = GET_OLDC(tmp_frame, localc);
+		cp = c->constant_pool;
+
+		localc = GET_OLDLOCALC(tmp_frame, localc);
+
+		*((u8 *) tmp_frame) = *((u8 *) (optop - 1)); // return value
+		optop = tmp_frame + 1;
+
+		NEXT();
+	freturn:
+		// Identical to ireturn
+		tmp_frame = frame;
+		frame = GET_OLDFRAME(tmp_frame, localc);
+		pc = GET_OLDPC(tmp_frame, localc);
+		c = GET_OLDC(tmp_frame, localc);
+		cp = c->constant_pool;
+
+		localc = GET_OLDLOCALC(tmp_frame, localc);
+
+		*tmp_frame = *optop; // return value
+		optop = tmp_frame;
+
+		NEXT();
+	dreturn:
+		// Identical to lreturn
+		tmp_frame = frame;
+		frame = GET_OLDFRAME(tmp_frame, localc);
+		pc = GET_OLDPC(tmp_frame, localc);
+		c = GET_OLDC(tmp_frame, localc);
+		cp = c->constant_pool;
+
+		localc = GET_OLDLOCALC(tmp_frame, localc);
+
+		*((u8 *) tmp_frame) = *((u8 *) (optop - 1)); // return value
+		optop = tmp_frame + 1;
+
 		NEXT();
 
 	_return:
