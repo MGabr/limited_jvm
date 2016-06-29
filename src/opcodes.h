@@ -105,17 +105,17 @@
 #define FNEG (118)
 #define DNEG (119)
 #define ISHL (120)
-#define LSHL (121) //
+#define LSHL (121)
 #define ISHR (122)
-#define LSHR (123) //
+#define LSHR (123)
 #define IUSHR (124)
-#define LUSHR (125) //
+#define LUSHR (125)
 #define IAND (126)
-#define LAND (127) //
+#define LAND (127)
 #define IOR (128)
-#define LOR (129) //
+#define LOR (129)
 #define IXOR (130)
-#define LXOR (131) //
+#define LXOR (131)
 #define IINC (132)
 #define I2L (133)
 #define I2F (134)

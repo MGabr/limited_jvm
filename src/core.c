@@ -396,6 +396,7 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		NEXT();
 	lload:
 		*((u8 *) ++optop) = *((u8 *) (frame + *pc++));
+		optop++;
 		NEXT();
 	fload:
 		*++optop = *(frame + *pc++);
@@ -710,7 +711,10 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		*optop <<= (*(optop + 1) & 0x1f);
 		NEXT();
 	lshl:
-		// TODO: Implement
+		// TODO: is this the right arithmetic shift?
+		optop--;
+		// only the 6 lowest-order bits are used for shift
+		*((u8 *) (optop - 1)) <<= (*(optop + 1) & 0x3f);
 		NEXT();
 	ishr:
 		optop--;
@@ -719,7 +723,10 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		*((i4 *) optop) >>= (*(optop + 1) & 0x1f);
 		NEXT();
 	lshr:
-		// TODO: Implement
+		optop--;
+		// only the 6 lowest-order bits are used for shift
+		// TODO: arithmetic shift not portable
+		*((i8 *) (optop - 1)) >>= (*(optop + 1) & 0x3f);
 		NEXT();
 	iushr:
 		optop--;
@@ -727,28 +734,33 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		*optop >>= (*(optop + 1) & 0x1f);
 		NEXT();
 	lushr:
-		// TODO: Implement
+		optop--;
+		// only the 6 lowest-order bits are used for shift
+		*((u8 *) (optop - 1)) >>= (*(optop + 1) & 0x3f);
 		NEXT();
 	iand:
 		optop--;
 		*optop &= *(optop + 1);
 		NEXT();
 	land:
-		// TODO: Implement
+		*((u8 *) (optop - 3)) &= *((u8 *) (optop - 1));
+		optop -= 2;
 		NEXT();
 	ior:
 		optop--;
 		*optop |= *(optop + 1);
 		NEXT();
 	lor:
-		// TODO: Implement
+		*((u8 *) (optop - 3)) |= *((u8 *) (optop - 1));
+		optop -= 2;
 		NEXT();
 	ixor:
 		optop--;
 		*optop ^= *(optop + 1);
 		NEXT();
 	lxor:
-		// TODO: Implement
+		*((u8 *) (optop - 3)) ^= *((u8 *) (optop - 1));
+		optop -= 2;
 		NEXT();
 	iinc:
 		*(frame + *pc) += (i1) *(pc + 1);
