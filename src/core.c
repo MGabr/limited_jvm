@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <math.h>
+#include <fenv.h>
 
 #include "parser.h"
 #include "options.h"
@@ -241,6 +242,21 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[IXOR] = &&ixor;
 	table[LXOR] = &&lxor;
 	table[IINC] = &&iinc;
+	table[I2L] = &&i2l;
+	table[I2F] = &&i2f;
+	table[I2D] = &&i2d;
+	table[L2I] = &&l2i;
+	table[L2F] = &&l2f;
+	table[L2D] = &&l2d;
+	table[F2I] = &&f2i;
+	table[F2L] = &&f2l;
+	table[F2D] = &&f2d;
+	table[D2I] = &&d2i;
+	table[D2L] = &&d2l;
+	table[D2F] = &&d2f;
+	table[INT2BYTE] = &&int2byte;
+	table[INT2CHAR] = &&int2char;
+	table[INT2SHORT] = &&int2short;
 	table[IFEQ] = &&ifeq;
 	table[IFNE] = &&ifne;
 	table[IFLT] = &&iflt;
@@ -262,6 +278,9 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	
 	// initialize set of predefined native method
 	init_natives();
+
+	// set rounding mode to nearest number
+	fesetround(FE_TONEAREST);
 
 #ifdef _TESTMODE_
 	init_testmode();
@@ -359,6 +378,7 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		NEXT();	
 	dload:
 		*((double *) ++optop) = *((double *) (frame + *pc++));
+		optop++;
 		NEXT();
 	aload:
 	iload_0:
@@ -689,6 +709,99 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	iinc:
 		*(frame + *pc) += (i1) *(pc + 1);
 		pc += 2;
+		NEXT();
+	i2l:
+		*((i8 *) optop) = (i8) *((i4 *) optop);
+		optop++;
+		NEXT();
+	i2f:
+		*((float *) optop) = (float) *((i4 *) optop);
+		NEXT();
+	i2d:
+		*((double *) optop) = (double) *((i4 *) optop);
+		optop++;
+		NEXT();
+	l2i:
+		optop--;
+		NEXT();
+	l2f:
+		*((float *) (optop - 1)) = (float) *((i8 *) (optop - 1));
+		optop--;
+		NEXT();
+	l2d:
+		*((double *) (optop - 1)) = (double) *((i8 *) (optop - 1));
+		NEXT();
+	f2i:
+		if (*((float *) optop) == NAN) {
+			*((i4 *) optop) = 0;
+		} else if (*((float *) optop) <= INT32_MIN) {
+			*((i4 *) optop) = INT32_MIN;
+		} else if (*((float *) optop) >= INT32_MAX) {
+			*((i4 *) optop) = INT32_MAX;
+		} else {
+			fesetround(FE_TOWARDZERO);
+			*((i4 *) optop) = (i4) *((float *) optop);
+			fesetround(FE_TONEAREST);
+		}
+		NEXT();
+	f2l:
+		if (*((float *) optop) == NAN) {
+			*((i8 *) optop) = 0;
+		} else if (*((float *) optop) <= INT64_MIN) {
+			*((i8 *) optop) = INT64_MIN;
+		} else if (*((float *) optop) >= INT64_MAX) {
+			*((i8 *) optop) = INT64_MAX;
+		} else {
+			fesetround(FE_TOWARDZERO);
+			*((i8 *) optop) = (i8) *((float *) optop);
+			fesetround(FE_TONEAREST);
+		}
+		optop++;
+		NEXT();
+	f2d:
+		*((double *) optop) = (double) *((float *) optop);
+		optop++;
+		NEXT();
+	d2i:
+		if (*((double *) (optop - 1)) == NAN) {
+			*((i4 *) (optop - 1)) = 0;
+		} else if (*((double *) (optop - 1)) <= INT32_MIN) {
+			*((i4 *) (optop - 1)) = INT32_MIN;
+		} else if (*((double *) (optop - 1)) >= INT32_MAX) {
+			*((i4 *) (optop - 1)) = INT32_MAX;
+		} else {
+			fesetround(FE_TOWARDZERO);
+			*((i4 *) (optop - 1)) = (i4) *((double *) (optop - 1));
+			fesetround(FE_TONEAREST);
+		}
+		optop--;
+		NEXT();
+	d2l:
+		if (*((double *) (optop - 1)) == NAN) {
+			*((i8 *) (optop - 1)) = 0;
+		} else if (*((double *) (optop - 1)) <= INT64_MIN) {
+			*((i8 *) (optop - 1)) = INT64_MIN;
+		} else if (*((double *) (optop - 1)) >= INT64_MAX) {
+			printf("%f\n", *((double *) (optop - 1)));
+			*((i8 *) (optop - 1)) = INT64_MAX;
+		} else {
+			fesetround(FE_TOWARDZERO);
+			*((i8 *) (optop - 1)) = (i8) *((double *) (optop - 1));
+			fesetround(FE_TONEAREST);
+		}
+		NEXT();
+	d2f:
+		*((float *) (optop - 1)) = (float) *((double *) (optop - 1));
+		optop--;
+		NEXT();
+	int2byte:
+		*((i4 *) optop) = (i4) *((i1 *) optop); // sign extension through cast
+		NEXT();
+	int2char:
+		*((u4 *) optop) = (u4) *((u2 *) optop); // zero extension through cast
+		NEXT();			
+	int2short:
+		*((i4 *) optop) = (i4) *((i2 *) optop); // sign extension through cast
 		NEXT();
 
 	ifeq:

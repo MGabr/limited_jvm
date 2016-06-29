@@ -5,7 +5,7 @@
 #define ICONST_3 (6)
 #define ICONST_4 (7)
 #define ICONST_5 (8)
-#define LCONST_0 (9) //
+#define LCONST_0 (9)
 #define LCONST_1 (10)
 #define FCONST_0 (11)
 #define FCONST_1 (12)
@@ -18,7 +18,7 @@
 #define LDC2 (19)
 #define LDC2W (20)
 #define ILOAD (21)
-#define LLOAD (22) //
+#define LLOAD (22) 
 #define FLOAD (23)
 #define DLOAD (24)
 #define ALOAD (25)
@@ -26,10 +26,10 @@
 #define ILOAD_1 (27)
 #define ILOAD_2 (28)
 #define ILOAD_3 (29)
-#define LLOAD_0 (30) //
-#define LLOAD_1 (31) //
-#define LLOAD_2 (32) //
-#define LLOAD_3 (33) //
+#define LLOAD_0 (30) 
+#define LLOAD_1 (31) 
+#define LLOAD_2 (32) 
+#define LLOAD_3 (33) 
 #define FLOAD_0 (34)
 #define FLOAD_1 (35)
 #define FLOAD_2 (36)
@@ -43,9 +43,10 @@
 #define ALOAD_2 (44)
 #define ALOAD_3 (45)
 
+// array load
 
 #define ISTORE (54)
-#define LSTORE (55) //
+#define LSTORE (55)
 #define FSTORE (56)
 #define DSTORE (57)
 
@@ -53,10 +54,10 @@
 #define ISTORE_1 (60)
 #define ISTORE_2 (61)
 #define ISTORE_3 (62)
-#define LSTORE_0 (63) //
-#define LSTORE_1 (64) //
-#define LSTORE_2 (65) //
-#define LSTORE_3 (66) //
+#define LSTORE_0 (63)
+#define LSTORE_1 (64)
+#define LSTORE_2 (65)
+#define LSTORE_3 (66)
 #define FSTORE_0 (67)
 #define FSTORE_1 (68)
 #define FSTORE_2 (69)
@@ -66,29 +67,30 @@
 #define DSTORE_2 (73)
 #define DSTORE_3 (74)
 
+// object and array store, stack operations
 
 #define IADD (96)
-#define LADD (97) //
+#define LADD (97)
 #define FADD (98)
 #define DADD (99)
 #define ISUB (100)
-#define LSUB (101) //
+#define LSUB (101)
 #define FSUB (102)
 #define DSUB (103)
 #define IMUL (104)
-#define LMUL (105) //
+#define LMUL (105)
 #define FMUL (106)
 #define DMUL (107)
 #define IDIV (108)
-#define LDIV (109) //
+#define LDIV (109)
 #define FDIV (110)
 #define DDIV (111)
 #define IREM (112)
-#define LREM (113) //
+#define LREM (113)
 #define FREM (114)
 #define DREM (115)
 #define INEG (116)
-#define LNEG (117) //
+#define LNEG (117)
 #define FNEG (118)
 #define DNEG (119)
 #define ISHL (120)
@@ -104,7 +106,23 @@
 #define IXOR (130)
 #define LXOR (131) //
 #define IINC (132)
+#define I2L (133)
+#define I2F (134)
+#define I2D (135)
+#define L2I (136)
+#define L2F (137)
+#define L2D (138)
+#define F2I (139)
+#define F2L (140)
+#define F2D (141)
+#define D2I (142)
+#define D2L (143)
+#define D2F (144)
+#define INT2BYTE (145)
+#define INT2CHAR (146)
+#define INT2SHORT (147)
 
+// comparisons with other types
 
 #define IFEQ (153)
 #define IFNE (154)
@@ -119,12 +137,15 @@
 #define IF_ICMPGT (163)
 #define IF_ICMPLE (164)
 
+// object comparisons
 
 #define GOTO (167)
 
+// jsr, switch and return statements
 
 #define RETURN (177)
 
+// static and normal field access and function invocation
 
 #define INVOKENONVIRTUAL (183)
 #define INVOKESTATIC (184)
