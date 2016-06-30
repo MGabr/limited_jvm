@@ -1,6 +1,15 @@
 Installing googletest as shared library on linux:
 http://stackoverflow.com/a/13513907
 
-extra options to compile as 32-bit on linux 64-bit:
+Extra options to compile as 32-bit on linux 64-bit:
 cmake -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32 -DBUILD_SHARED_LIBS=ON .
+
+Steps:
+wget https://github.com/google/googletest/archive/release-1.7.0.tar.gz
+tar xf release-1.7.0.tar.gz
+cd googletest-release-1.7.0
+cmake -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32 -DBUILD_SHARED_LIBS=ON
+make
+sudo cp -a include/gtest /usr/include
+sudo cp -a libgtest_main.so libgtest.so /usr/lib/
 

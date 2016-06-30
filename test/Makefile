@@ -156,5 +156,5 @@ SwitchTest.class:
 	cd java && javac SwitchTest.java && mv $@ ../classes/.
 
 clean:
-	rm classes/* Tests ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o SignatureTest.o ResolveTest.o InvokestaticTest.o NativeTest.o HelloWorldTest.o IntegerTest.o IntegerNegativeTest.o IntegerLogicalTest.o ControlTest.o CompareControlTest.o FloatTest.o DoubleTest.o LongTest.o CastTest.o ReturnTest.o CompareTest.o LongLogicalTest.o SwitchTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o ../src/signature.o ../src/native.o ../src/java.o
+	rm classes/* Tests ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o SignatureTest.o ResolveTest.o InvokestaticTest.o NativeTest.o HelloWorldTest.o IntegerTest.o IntegerNegativeTest.o IntegerLogicalTest.o ControlTest.o CompareControlTest.o FloatTest.o DoubleTest.o LongTest.o CastTest.o ReturnTest.o CompareTest.o LongLogicalTest.o SwitchTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o ../src/signature.o ../src/native.o ../src/java.o ../src/warn.o
 

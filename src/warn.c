@@ -24,7 +24,7 @@ void print_portability_warnings(void) {
 #endif
 
 #ifndef INFINITY
-	fprinf(stderr, "WARNING: Not IEEE conforming floating point operations: INFINITY not defined.\n");
+	fprintf(stderr, "WARNING: Not IEEE conforming floating point operations: INFINITY not defined.\n");
 #endif
 }
 
