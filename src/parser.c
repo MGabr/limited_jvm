@@ -214,11 +214,21 @@ static void parse_attribute(struct attribute_info *att, struct cp_info *cp,
 	}
 }
 
-static void parse_field(struct field_info *f, struct cp_info *cp, FILE *fp)
+static void parse_field(struct r_field_info *f, struct cp_info *cp, FILE *fp)
 {
 	read_e16(&f->access_flags, fp);
-	read_e16(&f->name_index, fp);
-	read_e16(&f->signature_index, fp);
+
+	// resolve to name and signature
+	u2 name_index;
+	u2 signature_index;
+	read_e16(&name_index, fp);
+	read_e16(&signature_index, fp);
+	f->name = cp[name_index].r_utf8_info.str;
+	f->signature = cp[signature_index].r_utf8_info.str;
+
+	// initialize field to 0
+	f->byte1 = 0;
+	f->byte2 = 0;
 
 	read_e16(&f->attributes_count, fp);
 	f->attributes = malloc(sizeof(struct attribute_info) * f->attributes_count);
@@ -278,7 +288,7 @@ static void parse_interfaces(struct ClassFile *cf, FILE *fp)
 static void parse_fields(struct ClassFile *cf, FILE *fp)
 {
 	read_e16(&cf->fields_count, fp);
-	cf->fields = malloc(sizeof(struct field_info) * cf->fields_count);
+	cf->fields = malloc(sizeof(struct r_field_info) * cf->fields_count);
 	int i;
 	for (i = 0; i < cf->fields_count; i++) {
 		parse_field(&cf->fields[i], cf->constant_pool, fp);
@@ -310,7 +320,10 @@ struct ClassFile *parse(const char *filename)
 {
 	char *full_filename = malloc(strlen(filename) + strlen(".class") + 1);
 	strcpy(full_filename, filename);
-	strcat(full_filename, ".class");
+	char *dot = strrchr(full_filename, '.');
+	if (!dot || strcmp(dot, ".class")) {
+		strcat(full_filename, ".class");
+	}
 	FILE *fp = fopen(full_filename, "r");
 	if (fp == NULL) {
 		printf("Error while trying to load class %s: %s\n",

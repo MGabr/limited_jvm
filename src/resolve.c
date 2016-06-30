@@ -35,9 +35,12 @@ struct ClassFile *resolve_class(struct ClassFile *curr_class, u2 index)
 		}
 	}
 
-	fprintf(stderr, "Error while trying to resolve class %s: Class loading not supported yet.\n", name);
-	exit(1);
-	return NULL; // TODO: CLASS LOADING
+	struct ClassFile *loaded_clas = parse(clas->name);
+	loaded_clas->next = clas->next;
+	clas->next = loaded_clas;
+	cp[index].tag = RESOLVED_Class;
+	cp[index].r_class_info.r_class = loaded_clas;
+	return loaded_clas; 
 }
 
 /**
@@ -104,6 +107,37 @@ struct r_methodref_info *resolve_methodref(struct ClassFile *c, u2 index)
 	return NULL;
 }
 
+struct r_fieldref_info *resolve_fieldref(struct ClassFile *c, u2 index)
+{
+	struct cp_info *cp = c->constant_pool;
+
+	struct ClassFile *f_class;
+
+	if (!IS_RESOLVED(cp, cp[index].fieldref_info.class_index)) {
+		f_class = resolve_class(c, cp[index].fieldref_info.class_index); 
+	}
+
+	int signature_index = cp[index].fieldref_info.name_and_type_index;
+	if (!IS_RESOLVED(cp, signature_index)) {
+		resolve_nameAndType(cp, signature_index);
+	}
+
+	const char *f_name = cp[signature_index].r_nameAndType_info.name_str;
+	const char *f_signature
+		= cp[signature_index].r_nameAndType_info.signature_str;
+
+	int i;
+	struct r_field_info f;
+	for (i = 0; i < f_class->fields_count; i++) {
+		f = f_class->fields[i];
+		if (f.name == f_name && f.signature == f_signature) {
+			cp[index].r_fieldref_info.r_class = f_class;
+			cp[index].r_fieldref_info.r_field = &f;
+			return &cp[index].r_fieldref_info;
+		}
+	}
+}
+
 /**
  * Resolves a constant - this means that index references to other constants
  * are resolved into actual references e.g. string_index is changed to a pointe
@@ -123,7 +157,7 @@ void resolve_const(struct ClassFile *c, u2 index)
 			(void) resolve_class(c, index);
 			break;
 		case CONSTANT_Fieldref:
-			// TODO
+			(void) resolve_fieldref(c, index);
 			break;
 		case CONSTANT_Methodref:
 			(void) resolve_methodref(c, index);

@@ -64,6 +64,11 @@ struct r_methodref_info {
 	struct r_method_info *r_method;
 };
 
+struct r_fieldref_info {
+	struct ClassFile *r_class;
+	struct r_field_info *r_field;
+};
+
 struct cp_info {
 	u1 tag;
 	union {
@@ -85,7 +90,7 @@ struct cp_info {
 			u2 class_index;
 			u2 name_and_type_index;
 		} fieldref_info;
-		// TODO: RESOLVED_Fieldref_info
+		struct r_fieldref_info r_fieldref_info;
 
 		struct {
 			u2 class_index;
@@ -156,12 +161,15 @@ struct cp_info {
 	};
 };
 
-struct field_info {
+struct r_field_info {
 	u2 access_flags;
-	u2 name_index;
-	u2 signature_index;
+	const char *name;
+	const char *signature;
 	u2 attributes_count;
 	struct attribute_info *attributes;
+
+	u4 byte1;
+	u4 byte2;
 };
 
 struct r_method_info {
@@ -247,7 +255,7 @@ struct ClassFile {
 	u2 interfaces_count;
 	u2 *interfaces;
 	u2 fields_count;
-	struct field_info *fields;
+	struct r_field_info *fields;
 	u2 methods_count;
 	struct r_method_info *methods;
 	u2 attributes_count;

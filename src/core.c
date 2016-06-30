@@ -297,6 +297,8 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[FRETURN] = &&freturn;
 	table[DRETURN] = &&dreturn;
 	table[RETURN] = &&_return;
+	table[GETSTATIC] = &&getstatic;
+	table[PUTSTATIC] = &&putstatic;
 	table[INVOKENONVIRTUAL] = &&invokenonvirtual;
 	table[INVOKESTATIC] = &&invokestatic;
 	table[IMPDEP1] = &&impdep1;
@@ -323,6 +325,8 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	u4 def_offset_addr_i;
 	i4 *def_offset_addr;
 	i4 low;
+	struct r_fieldref_info *f;
+	struct r_field_info *f_block;
 
 	nop:
 		// do nothing
@@ -1160,6 +1164,59 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		optop = tmp_frame - 1;
 
 		NEXT();
+	getstatic:
+		if (!IS_RESOLVED(cp, index)) {
+			resolve_fieldref(c, index);
+		}
+		f = &cp[index].r_fieldref_info;
+		f_block = f->r_field;
+		
+		switch (*f_block->signature) {
+			case 'B':
+			case 'C':
+			case 'F':
+			case 'I':
+			case 'S':
+			case 'Z':
+				*++optop = f_block->byte1;
+				break;
+
+			case 'D':
+			case 'L':
+				*++optop = f_block->byte2;
+				*++optop = f_block->byte1;
+				break;
+
+			// arrays and objects currently not supported
+		}
+		NEXT();
+	putstatic:
+		if (!IS_RESOLVED(cp, index)) {
+			resolve_fieldref(c, index);
+		}
+		f = &cp[index].r_fieldref_info;
+		f_block = f->r_field;
+
+		switch (*f_block->signature) {
+			case 'B':
+			case 'C':
+			case 'F':
+			case 'I':
+			case 'S':
+			case 'Z':
+				f_block->byte1 = *optop--;
+				break;
+
+			case 'D':
+			case 'L':
+				f_block->byte2 = *optop--;
+				f_block->byte1 = *optop--;
+				break;
+
+			// arrays and objects currently not supported
+		}
+		NEXT();
+
 	invokenonvirtual:
 	invokestatic:
 		index = TWO_BYTE_INDEX(pc);

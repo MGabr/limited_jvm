@@ -35,6 +35,8 @@ void resolve_nameAndType(struct cp_info *cp, u2 index);
  */
 struct r_methodref_info *resolve_methodref(struct ClassFile *c, u2 index);
 
+struct r_fieldref_info *resolve_fieldref(struct ClassFile *c, u2 index);
+
 /**
  * Resolves a constant - this means that index references to other constants
  * are resolved into actual references e.g. string_index is changed to a pointe
