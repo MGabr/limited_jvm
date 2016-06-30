@@ -3,6 +3,10 @@
 #include "warn.h"
 
 void print_portability_warnings(void) {
+	if (sizeof(double) != 8) {
+		fprintf(stderr, "WARNING: Different double size: %zu\n", 
+			sizeof(double));
+	}
 
 #ifndef __STDC_IEC_599__
 	if (sizeof(float) != 4) {
