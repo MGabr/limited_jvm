@@ -1,3 +1,9 @@
+/**
+ * @file string_pool.h 
+ * @author Markus Gabriel
+ * @brief String pool implementation
+ *
+ */
 #ifndef STRING_POOL_H
 #define STRING_POOL_H
 
@@ -13,7 +19,7 @@ extern void init_string_pool(void);
  *
  * @detail If there is no string with the same name, a reference to this 
  * 		   string is added to the string pool. In this case, DO NOT FREE the 
- *		   input string memory
+ *		   input string memory since the string will be used in the string pool
  *
  * @param str the string to add
  * @return the adress of a string with the same name or the address of the 

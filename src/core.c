@@ -12,6 +12,16 @@
 #include "resolve.h"
 #include "opcodes.h"
 #include "native.h"
+#include "log.h"
+#include "log_levels.h"
+#include "opcode_strings.h"
+#include "settings.h"
+
+#ifdef _LOG_INSTRS_
+	#define LOG_INSTR printf("- %s\n", opcode_strings[*pc])
+#else
+	#define LOG_INSTR 
+#endif
 
 /* ======================= TESTMODE PART ========================= */
 
@@ -37,6 +47,7 @@ if (instrs_counter == 0) {\
 	return;\
 }\
 instrs_counter++;\
+LOG_INSTR;\
 goto *table[*pc++];
 #endif
 
@@ -44,19 +55,22 @@ goto *table[*pc++];
 
 
 #ifndef _TESTMODE_
-	#define NEXT() goto *table[*pc++];
+	#define NEXT() LOG_INSTR;\
+goto *table[*pc++];
 #endif
 
 
 struct r_method_info *get_main_method(struct ClassFile *c)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	int i;
 	struct r_method_info *mi;
 
 	const char *main_str = find_string("main");
 	const char *signature_str = find_string("([Ljava/lang/String;)V");
 	if (main_str == NULL || signature_str == NULL) {
-		fprintf(stderr, "Can not run program: No main method found (no main or signature string in string pool).\n");
+		ERROR("Can not run program: No main method found (no main or signature string in string pool).\n");
 		exit(1);
 	}
 
@@ -68,7 +82,7 @@ struct r_method_info *get_main_method(struct ClassFile *c)
 	}
 
 	if (mi == NULL) {
-		fprintf(stderr, "Can not run program: No main method found.\n");
+		ERROR("Can not run program: No main method found.\n");
 		exit(1);
 	}
 
@@ -77,11 +91,12 @@ struct r_method_info *get_main_method(struct ClassFile *c)
 
 static void *allocate_stack(void)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	void *stack = mmap(NULL, stack_size, PROT_READ | PROT_WRITE, 
 		MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (stack == MAP_FAILED) {
-		fprintf(stderr, 
-			"Can not run program: Could not allocate space for stack.\n");
+		ERROR("Can not run program: Could not allocate space for stack.\n");
 	}
 	return stack;
 }
@@ -101,6 +116,8 @@ static void *allocate_stack(void)
 
 void run(struct ClassFile *c, struct r_method_info *main)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	//  ------------ 'registers' and initialization of vm ------------
 
 	u1 *pc; // program counter
@@ -303,7 +320,6 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[INVOKESTATIC] = &&invokestatic;
 	table[IMPDEP1] = &&impdep1;
 
-	
 	// initialize set of predefined native method
 	init_natives();
 
@@ -624,7 +640,7 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		NEXT();
 	idiv:
 		if (*optop == 0) {
-			fprintf(stderr, "ArithmeticException: / by zero\n");
+			ERROR("ArithmeticException: / by zero\n");
 			exit(1);
 		}
 		optop--;
@@ -632,7 +648,7 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		NEXT();
 	ldiv:
 		if (*((i8 *) (optop - 1)) == 0) {
-			fprintf(stderr, "ArithmeticException: / by zero\n");
+			ERROR("ArithmeticException: / by zero\n");
 			exit(1);
 		}
 		optop -= 2;
@@ -652,7 +668,7 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	irem:
 		// TODO: extra tests for special cases
 		if (*optop == 0) {
-			fprintf(stderr, "ArithmeticException: %% by zero\n");
+			ERROR("ArithmeticException: %% by zero\n");
 			exit(1);
 		}
 		optop--;
@@ -663,7 +679,7 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	lrem:
 		// TODO: extra tests for special cases
 		if (*((i8 *) (optop - 1)) == 0) {
-			fprintf(stderr, "ArithmeticException: %% by zero\n");
+			ERROR("ArithmeticException: %% by zero\n");
 			exit(1);
 		}
 		optop -= 2;

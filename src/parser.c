@@ -7,6 +7,7 @@
 #include "parser.h"
 #include "string_pool.h"
 #include "signature.h"
+#include "log.h"
 
 int little_endian = 1;
 
@@ -60,6 +61,8 @@ static int second_double_or_long_part = 0;
 
 static void parse_constant(struct cp_info *cp, FILE *fp)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	if (second_double_or_long_part) {
 		second_double_or_long_part = 0;
 		return;
@@ -136,10 +139,11 @@ static void parse_constant(struct cp_info *cp, FILE *fp)
 			cp->tag = RESOLVED_Utf8;
 			break;
 		case CONSTANT_Unicode:
-			fprintf(stderr, "Unicode currently not supported.\n");
+			ERROR("Unicode currently not supported.\n");
 			exit(1);
 		default:
-			fprintf(stderr, "Corrupted class file: Wrong constant type tag %u\n", cp->tag);
+			ERROR("Corrupted class file: Wrong constant type tag %u\n", 
+				cp->tag);
 			exit(1);
 	}
 }
@@ -147,6 +151,8 @@ static void parse_constant(struct cp_info *cp, FILE *fp)
 static void parse_ConstantValue_attribute(struct ConstantValue_attribute *cv,
 	FILE *fp)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	read_e16(&cv->sourcefile_index, fp);
 }
 
@@ -164,6 +170,8 @@ static void parse_attribute(struct attribute_info *att, struct cp_info *cp,
 static void parse_Code_attribute(struct Code_attribute *code,struct cp_info *cp,
 	FILE *fp)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	// set c_attr of the last method
 	if (c_attr_to_set != NULL) {
 		*c_attr_to_set = code;
@@ -194,11 +202,13 @@ static void parse_Code_attribute(struct Code_attribute *code,struct cp_info *cp,
 static void parse_attribute(struct attribute_info *att, struct cp_info *cp, 
 	FILE *fp)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	read_e16(&att->attribute_name_index, fp);
 	read_e32(&att->attribute_length, fp);
 
 	if (cp[att->attribute_name_index].tag != RESOLVED_Utf8) {
-		fprintf(stderr, "Corrupted class file: Wrong constant type tag %u for attribute_name_index, %u required.\n", att->attribute_name_index, CONSTANT_Utf8);
+		ERROR("Corrupted class file: Wrong constant type tag %u for attribute_name_index, %u required.\n", att->attribute_name_index, CONSTANT_Utf8);
 		exit(1);
 	}
 
@@ -216,6 +226,8 @@ static void parse_attribute(struct attribute_info *att, struct cp_info *cp,
 
 static void parse_field(struct r_field_info *f, struct cp_info *cp, FILE *fp)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	read_e16(&f->access_flags, fp);
 
 	// resolve to name and signature
@@ -240,6 +252,8 @@ static void parse_field(struct r_field_info *f, struct cp_info *cp, FILE *fp)
 
 static void parse_method(struct r_method_info *m, struct cp_info *cp, FILE *fp)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	read_e16(&m->access_flags, fp);
 
 	// resolve name and signature
@@ -266,6 +280,8 @@ static void parse_method(struct r_method_info *m, struct cp_info *cp, FILE *fp)
 
 static void parse_constant_pool(struct ClassFile *cf, FILE *fp)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	read_e16(&cf->constant_pool_count, fp);
 	cf->constant_pool = malloc(
 		sizeof(struct cp_info) * cf->constant_pool_count);
@@ -277,6 +293,8 @@ static void parse_constant_pool(struct ClassFile *cf, FILE *fp)
 
 static void parse_interfaces(struct ClassFile *cf, FILE *fp)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	read_e16(&cf->interfaces_count, fp);
 	cf->interfaces = malloc(sizeof(u2) * cf->interfaces_count);
 	int i;
@@ -287,6 +305,8 @@ static void parse_interfaces(struct ClassFile *cf, FILE *fp)
 
 static void parse_fields(struct ClassFile *cf, FILE *fp)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	read_e16(&cf->fields_count, fp);
 	cf->fields = malloc(sizeof(struct r_field_info) * cf->fields_count);
 	int i;
@@ -297,6 +317,8 @@ static void parse_fields(struct ClassFile *cf, FILE *fp)
 
 static void parse_methods(struct ClassFile *cf, FILE *fp)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	read_e16(&cf->methods_count, fp);
 	cf->methods = malloc(sizeof(struct r_method_info) * cf->methods_count);
 	int i;
@@ -307,6 +329,8 @@ static void parse_methods(struct ClassFile *cf, FILE *fp)
 
 static void parse_attributes(struct ClassFile *cf, FILE *fp)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	read_e16(&cf->attributes_count, fp);
 	cf->attributes = malloc(
 		sizeof(struct attribute_info) * cf->attributes_count);
@@ -318,6 +342,8 @@ static void parse_attributes(struct ClassFile *cf, FILE *fp)
 
 struct ClassFile *parse(const char *filename)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	char *full_filename = malloc(strlen(filename) + strlen(".class") + 1);
 	strcpy(full_filename, filename);
 	char *dot = strrchr(full_filename, '.');
@@ -326,7 +352,7 @@ struct ClassFile *parse(const char *filename)
 	}
 	FILE *fp = fopen(full_filename, "r");
 	if (fp == NULL) {
-		printf("Error while trying to load class %s: %s\n",
+		ERROR("Error while trying to load class %s: %s\n",
 			full_filename, strerror(errno));
 		exit(1);
 	}
@@ -338,7 +364,7 @@ struct ClassFile *parse(const char *filename)
 		little_endian = 1; 
 		cf->magic = bswap_32(cf->magic);
 		if (cf->magic != MAGIC) {
-			fprintf(stderr, "Not a class file: File does not begin with the magic number, but with %04x",  cf->magic);
+			ERROR("Not a class file: File does not begin with the magic number, but with %04x",  cf->magic);
 			exit(1);
 		}
 	}

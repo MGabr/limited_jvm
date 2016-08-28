@@ -1,3 +1,11 @@
+/**
+ * @file native.h
+ * @author Markus Gabriel
+ * @brief Interface for native method calls
+ *
+ * Interface and implementation of custom native method calls.
+ * Does not support JNI currently.
+ */
 #ifndef NATIVE_H
 #define NATIVE_H
 

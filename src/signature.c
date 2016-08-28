@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "signature.h"
+#include "log.h"
 
 /**
  * Calculate the number of arguments of a method signature.
@@ -12,6 +13,8 @@
  */
 u1 calculate_nargs(const char *signature)
 {
+	DEBUG("Entered %s\n", __func__);
+
     u1 nargs = 0;
 
 	int inClassPart = 0;
@@ -19,7 +22,7 @@ u1 calculate_nargs(const char *signature)
     int i = 0;
 
 	if (signature[i++] != '(') {
-		fprintf(stderr, "Error during calculation of nargs: Invalid (not starting with '(') signature %s\n", signature);
+		ERROR("Error during calculation of nargs: Invalid (not starting with '(') signature %s\n", signature);
 		exit(1);
 	}
 
@@ -67,7 +70,7 @@ u1 calculate_nargs(const char *signature)
 				inArrayPart = 1;
 				break;
 			default:
-				fprintf(stderr, "Error during calculation of nargs: Invalid signature %s\n", signature);
+				ERROR("Error during calculation of nargs: Invalid signature %s\n", signature);
 				exit(1);
         }
     }

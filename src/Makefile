@@ -1,10 +1,11 @@
 FLAGS=-Wall -m32
+LIBS=-lm
 
 all:
 	make java
 
-java: parser.o string_pool.o options.o testmode.o core.o resolve.o signature.o native.o java.o warn.o
-	gcc ${FLAGS} -o $@ $^
+java: parser.o string_pool.o options.o testmode.o core.o resolve.o signature.o native.o java.o warn.o opcode_strings.o
+	gcc ${FLAGS} -o $@ $^ ${LIBS}
 
 parser.o:
 	gcc ${FLAGS} -c parser.c
@@ -36,6 +37,9 @@ java.o:
 warn.o:
 	gcc ${FLAGS} -c warn.c
 
+opcode_strings.o:
+	gcc ${FLAGS} -c opcode_strings.c
+
 clean:
-	rm parser.o string_pool.o options.o core.o testmode.o resolve.o signature.o native.o java.o warn.o java
+	rm parser.o string_pool.o options.o core.o testmode.o resolve.o signature.o native.o java.o warn.o opcode_strings.o java
 

@@ -3,6 +3,7 @@
 
 #include "native.h"
 #include "string_pool.h"
+#include "log.h"
 
 // -------------- native method implementations -------------
 
@@ -17,16 +18,20 @@ const char *println_str;
 
 
 void init_natives(void) {
+	DEBUG("Entered %s\n", __func__);
+
 	// currently only methods with different names,
 	// so we don't also need to consider the method parameter types
 	println_str = add_string("println");
 };
 
 void call_native(struct r_method_info *method, u4 *optop) {
+	DEBUG("Entered %s\n", __func__);
+
 	if (method->name == println_str) {
 		println(*(const char **) optop);
 	} else {
-		fprintf(stderr, "Native method %s%s not supported. (No JNI support)\n", 
+		ERROR("Native method %s%s not supported. (No JNI support)\n", 
 			method->name, method->signature);
 		exit(1);
 	}

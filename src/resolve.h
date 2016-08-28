@@ -1,3 +1,11 @@
+/**
+ * @file resolve.h
+ * @author Markus Gabriel
+ * @brief Methods for resolving constant pool references
+ *
+ * Methods for resolving/replacing constant pool index references to/with direct
+ * references.
+ */
 #ifndef RESOLVE_H
 #define RESOLVE_H
 
@@ -35,11 +43,20 @@ void resolve_nameAndType(struct cp_info *cp, u2 index);
  */
 struct r_methodref_info *resolve_methodref(struct ClassFile *c, u2 index);
 
+/**
+ * Resolves a fieldref.
+ *
+ * @detail fieldref may not be already resolved
+ *
+ * @param c a pointer to the current class
+ * @param index constant pool index of the fieldref to resolve
+ * @return a reference to the resolved fieldref
+ */
 struct r_fieldref_info *resolve_fieldref(struct ClassFile *c, u2 index);
 
 /**
  * Resolves a constant - this means that index references to other constants
- * are resolved into actual references e.g. string_index is changed to a pointe
+ * are resolved into actual references e.g. string_index is changed to a pointer
  * to the string, class_index is changed to a pointer to the class file.
  *
  * @detail constant may not be already resolved
@@ -48,6 +65,5 @@ struct r_fieldref_info *resolve_fieldref(struct ClassFile *c, u2 index);
  * @param index constant pool index of the constant to resolve
  */
 void resolve_const(struct ClassFile *c, u2 index);
-
 
 #endif

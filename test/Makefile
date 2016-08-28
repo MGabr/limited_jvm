@@ -5,7 +5,7 @@ GTEST_HOME=~/usr/gtest
 all:
 	make Tests
 
-Tests: ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o SignatureTest.o ResolveTest.o InvokestaticTest.o NativeTest.o HelloWorldTest.o IntegerTest.o IntegerNegativeTest.o IntegerLogicalTest.o ControlTest.o CompareControlTest.o FloatTest.o DoubleTest.o LongTest.o CastTest.o ReturnTest.o CompareTest.o ../src/parser.o ../src/string_pool.o LongLogicalTest.o SwitchTest.o ClassLoadingTest.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o ../src/signature.o ../src/native.o ../src/java.o ../src/warn.o
+Tests: ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o SignatureTest.o ResolveTest.o InvokestaticTest.o NativeTest.o HelloWorldTest.o IntegerTest.o IntegerNegativeTest.o IntegerLogicalTest.o ControlTest.o CompareControlTest.o FloatTest.o DoubleTest.o LongTest.o CastTest.o ReturnTest.o CompareTest.o ../src/parser.o ../src/string_pool.o LongLogicalTest.o SwitchTest.o ClassLoadingTest.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o ../src/signature.o ../src/native.o ../src/java.o ../src/warn.o ../src/opcode_strings.o
 	make ParserTest.o
 	make StringPoolTest.o
 	make StringPoolConflictTest.o
@@ -165,8 +165,11 @@ ClassLoadingTest2.class:
 	cd java && javac ClassLoadingTest2.java && mv $@ ../classes/.
 
 ClassLoadingTest3.class:
-	cd java/apackage && javac ClassLoadingTest3.java && mv $@ ../../classes/.
+	cd java/apackage && javac ClassLoadingTest3.java && mv $@ ../../classes/apackage/.
+
+../src/opcode_strings.o:
+	cd ../src && make opcode_strings.o
 
 clean:
-	rm classes/* Tests ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o SignatureTest.o ResolveTest.o InvokestaticTest.o NativeTest.o HelloWorldTest.o IntegerTest.o IntegerNegativeTest.o IntegerLogicalTest.o ControlTest.o CompareControlTest.o FloatTest.o DoubleTest.o LongTest.o CastTest.o ReturnTest.o CompareTest.o LongLogicalTest.o SwitchTest.o ClassLoadingTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o ../src/signature.o ../src/native.o ../src/java.o ../src/warn.o
+	rm classes/*.class classes/apackage/*.class Tests ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o SignatureTest.o ResolveTest.o InvokestaticTest.o NativeTest.o HelloWorldTest.o IntegerTest.o IntegerNegativeTest.o IntegerLogicalTest.o ControlTest.o CompareControlTest.o FloatTest.o DoubleTest.o LongTest.o CastTest.o ReturnTest.o CompareTest.o LongLogicalTest.o SwitchTest.o ClassLoadingTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o ../src/signature.o ../src/native.o ../src/java.o ../src/warn.o ../src/opcode_strings.o
 

@@ -3,18 +3,12 @@
 #include <stddef.h>
 
 #include "parser.h"
+#include "log.h"
 
-/**
- * Resolves a class. 
- *
- * @detail class may not be already resolved
- *
- * @param cp a pointer to the constant pool
- * @param index constant pool index of the class to resolve
- * @return a reference to the ClassFile of the resolved class
- */
 struct ClassFile *resolve_class(struct ClassFile *curr_class, u2 index)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	struct cp_info *cp = curr_class->constant_pool;
 
 	const char *name = cp[cp[index].class_info.name_index].r_utf8_info.str;
@@ -43,16 +37,10 @@ struct ClassFile *resolve_class(struct ClassFile *curr_class, u2 index)
 	return loaded_clas; 
 }
 
-/**
- * Resolves a nameAndType constant. 
- *
- * @detail nameAndType may not be already resolved
- *
- * @param cp a pointer to the constant pool
- * @param index constant pool index of the nameAndType to resolve
- */
 void resolve_nameAndType(struct cp_info *cp, u2 index)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	const char *name_str
 		= cp[cp[index].nameAndType_info.name_index].r_utf8_info.str;
 	const char *signature_str
@@ -62,17 +50,10 @@ void resolve_nameAndType(struct cp_info *cp, u2 index)
 	cp[index].r_nameAndType_info.signature_str = signature_str;
 }
 
-/**
- * Resolves a methodref. 
- *
- * @detail methodref may not be already resolved
- *
- * @param c a pointer to the current class
- * @param index constant pool index of the methodref to resolve
- * @return a reference to the resolved methodref
- */
 struct r_methodref_info *resolve_methodref(struct ClassFile *c, u2 index)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	struct cp_info *cp = c->constant_pool;
 
 	struct ClassFile *m_class;
@@ -101,7 +82,9 @@ struct r_methodref_info *resolve_methodref(struct ClassFile *c, u2 index)
 		}
 	}
 
-	fprintf(stderr, "Error while trying to resolve method: Method %s%s not found in class.\n", m_name, m_signature);
+	ERROR(
+		"Error while trying to resolve method: Method %s%s not found in class.\n", 
+		m_name, m_signature);
 	exit(1);
 
 	return NULL;
@@ -109,6 +92,8 @@ struct r_methodref_info *resolve_methodref(struct ClassFile *c, u2 index)
 
 struct r_fieldref_info *resolve_fieldref(struct ClassFile *c, u2 index)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	struct cp_info *cp = c->constant_pool;
 
 	struct ClassFile *f_class;
@@ -136,20 +121,19 @@ struct r_fieldref_info *resolve_fieldref(struct ClassFile *c, u2 index)
 			return &cp[index].r_fieldref_info;
 		}
 	}
+
+	ERROR(
+		"Error while trying to resolve field: Field %s %s not found in class.\n",
+		f_signature, f_name);
+	exit(1);
+
+	return NULL;
 }
 
-/**
- * Resolves a constant - this means that index references to other constants
- * are resolved into actual references e.g. string_index is changed to a pointe
- * to the string, class_index is changed to a pointer to the class file.
- *
- * @detail constant may not be already resolved
- *
- * @param cp a pointer to the constant pool
- * @param index constant pool index of the constant to resolve
- */
 void resolve_const(struct ClassFile *c, u2 index)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	struct cp_info *cp = c->constant_pool;
 
 	switch (cp[index].tag) {
@@ -174,7 +158,7 @@ void resolve_const(struct ClassFile *c, u2 index)
 			resolve_nameAndType(cp, index);
 			break;
 		default:
-			fprintf(stderr, "Error while trying to resolve constant: Can not resolve constant with tag %i.\n", cp->tag);
+			ERROR("Error while trying to resolve constant: Can not resolve constant with tag %i.\n", cp->tag);
 			exit(1);
 	}
 }

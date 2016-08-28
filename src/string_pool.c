@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "options.h"
+#include "log.h"
 
 
 struct bucket *hashtable;
@@ -30,12 +31,16 @@ unsigned long hash(unsigned const char *str)
 
 void init_string_pool(void)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	// zero initialize, so all next pointers and all strings are NULL
 	hashtable = calloc(nr_string_buckets, sizeof(struct bucket));
 }
 
 const char *add_string(const char *str)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	long h = hash((unsigned const char *) str) % nr_string_buckets;
 	struct bucket *b = &hashtable[h];
 
@@ -58,6 +63,8 @@ const char *add_string(const char *str)
 
 const char *find_string(const char *str)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	long h = hash((unsigned const char *) str) % nr_string_buckets;
 	struct bucket *b = &hashtable[h];
 
