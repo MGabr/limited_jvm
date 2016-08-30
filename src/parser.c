@@ -8,6 +8,7 @@
 #include "string_pool.h"
 #include "signature.h"
 #include "log.h"
+#include "options.h"
 
 int little_endian = 1;
 
@@ -340,22 +341,17 @@ static void parse_attributes(struct ClassFile *cf, FILE *fp)
 	}
 }
 
-struct ClassFile *parse(const char *filename)
+/**
+ * Parses the given file into a class file structure.
+ *
+ * @param fp the file to parse into a class file structure
+ * @param classname the name of the class (file name without any paths and 
+ *                  without the .class file ending)
+ * @return the created class file
+ */
+static struct ClassFile *parse_file(FILE *fp, const char *simple_name)
 {
-	DEBUG("Entered %s\n", __func__);
-
-	char *full_filename = malloc(strlen(filename) + strlen(".class") + 1);
-	strcpy(full_filename, filename);
-	char *dot = strrchr(full_filename, '.');
-	if (!dot || strcmp(dot, ".class")) {
-		strcat(full_filename, ".class");
-	}
-	FILE *fp = fopen(full_filename, "r");
-	if (fp == NULL) {
-		ERROR("Error while trying to load class %s: %s\n",
-			full_filename, strerror(errno));
-		exit(1);
-	}
+	DEBUG("Entered %s(fp, simple_name=%s)\n", __func__, simple_name);
 
 	struct ClassFile *cf = malloc(sizeof(struct ClassFile));
 
@@ -386,24 +382,60 @@ struct ClassFile *parse(const char *filename)
 
 	parse_attributes(cf, fp);
 
-	const char *filename_wo_path = strrchr(filename, '/');
-	if (filename_wo_path == NULL) {
-		filename_wo_path = filename;
-	} else {
-		filename_wo_path += sizeof(char);
-	}
-	cf->name = add_string(filename_wo_path);
+	cf->name = add_string(simple_name);
 	cf->next = cf; // cyclic list
 
 	return cf;
 }
 
-/*
-int main(int argc, char *argv[])
+struct ClassFile *parse(const char *filename)
 {
-	if (argc != 2) {
-		fprintf(stderr, "Usage: %s <classfile name>\n", argv[0]);
-	}
-	parse(argv[1]);
+	return load_class(filename);
 }
-*/
+
+struct ClassFile *load_class(const char *classname)
+{
+	DEBUG("Entered %s(classname=%s)\n", __func__, classname);
+
+	char *full_filename = malloc(strlen(classname) + strlen(".class") + 1);
+	strcpy(full_filename, classname);
+	strcat(full_filename, ".class");
+
+	FILE *fp = fopen(full_filename, "r");
+
+	int i = 0;
+	char *filename_w_classpath = NULL;
+	while (fp == NULL && classpaths != NULL && classpaths[i] != NULL) {
+		filename_w_classpath = realloc(
+			filename_w_classpath, 
+			strlen(classpaths[i]) + strlen(full_filename) + 1);
+
+		strcpy(filename_w_classpath, classpaths[i]);
+		strcat(filename_w_classpath, "/");
+		strcat(filename_w_classpath, full_filename);
+
+		fp = fopen(filename_w_classpath, "r");
+		i++;
+	}
+	free(filename_w_classpath);
+
+	if (fp == NULL) {
+		ERROR("Error while trying to load class %s: %s\n",
+			full_filename, strerror(errno));
+		exit(1);
+	}
+
+	const char *simple_name = strrchr(classname, '/') + 1;
+	if (simple_name == NULL) {
+		simple_name = classname;
+	}
+
+	return parse_file(fp, simple_name);
+}
+
+void link_class(struct ClassFile *any_c, struct ClassFile *new_c)
+{
+	new_c->next = any_c->next;
+	any_c->next = new_c;
+}
+

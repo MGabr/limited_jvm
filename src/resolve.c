@@ -29,7 +29,7 @@ struct ClassFile *resolve_class(struct ClassFile *curr_class, u2 index)
 		}
 	}
 
-	struct ClassFile *loaded_clas = parse(clas->name);
+	struct ClassFile *loaded_clas = load_class(name);
 	loaded_clas->next = clas->next;
 	clas->next = loaded_clas;
 	cp[index].tag = RESOLVED_Class;
@@ -48,6 +48,7 @@ void resolve_nameAndType(struct cp_info *cp, u2 index)
 
 	cp[index].r_nameAndType_info.name_str = name_str; 
 	cp[index].r_nameAndType_info.signature_str = signature_str;
+	cp[index].tag = RESOLVED_NameAndType;
 }
 
 struct r_methodref_info *resolve_methodref(struct ClassFile *c, u2 index)
@@ -56,7 +57,7 @@ struct r_methodref_info *resolve_methodref(struct ClassFile *c, u2 index)
 
 	struct cp_info *cp = c->constant_pool;
 
-	struct ClassFile *m_class;
+	struct ClassFile *m_class = c;
 
 	if (!IS_RESOLVED(cp, cp[index].methodref_info.class_index)) {
 		m_class = resolve_class(c, cp[index].methodref_info.class_index);
@@ -78,6 +79,7 @@ struct r_methodref_info *resolve_methodref(struct ClassFile *c, u2 index)
 		if (m.name == m_name && m.signature == m_signature) {
 			cp[index].r_methodref_info.r_class = m_class;
 			cp[index].r_methodref_info.r_method = &m;
+			cp[index].tag = RESOLVED_Methodref;
 			return &cp[index].r_methodref_info;
 		}
 	}
@@ -96,7 +98,7 @@ struct r_fieldref_info *resolve_fieldref(struct ClassFile *c, u2 index)
 
 	struct cp_info *cp = c->constant_pool;
 
-	struct ClassFile *f_class;
+	struct ClassFile *f_class = c;
 
 	if (!IS_RESOLVED(cp, cp[index].fieldref_info.class_index)) {
 		f_class = resolve_class(c, cp[index].fieldref_info.class_index); 
@@ -118,6 +120,7 @@ struct r_fieldref_info *resolve_fieldref(struct ClassFile *c, u2 index)
 		if (f.name == f_name && f.signature == f_signature) {
 			cp[index].r_fieldref_info.r_class = f_class;
 			cp[index].r_fieldref_info.r_field = &f;
+			cp[index].tag = RESOLVED_Fieldref;
 			return &cp[index].r_fieldref_info;
 		}
 	}

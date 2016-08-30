@@ -39,7 +39,7 @@ void init_string_pool(void)
 
 const char *add_string(const char *str)
 {
-	DEBUG("Entered %s\n", __func__);
+	DEBUG("Entered %s(str=%s)\n", __func__, str);
 
 	long h = hash((unsigned const char *) str) % nr_string_buckets;
 	struct bucket *b = &hashtable[h];
@@ -63,7 +63,7 @@ const char *add_string(const char *str)
 
 const char *find_string(const char *str)
 {
-	DEBUG("Entered %s\n", __func__);
+	DEBUG("Entered %s(str=%s)\n", __func__, str);
 
 	long h = hash((unsigned const char *) str) % nr_string_buckets;
 	struct bucket *b = &hashtable[h];

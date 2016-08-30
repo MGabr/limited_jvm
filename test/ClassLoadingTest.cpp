@@ -25,8 +25,8 @@ TEST_F(ClassLoadingTest, callStaticMethod1) {
 	testing::internal::CaptureStdout();
 	run(ClassLoadingTest::cf, getMethod());
 
-	EXPECT_EQ("Called local static method\n", 
-		testing::internal::GetCapturedStdout());
+	EXPECT_STREQ("Called local static method\n", 
+		testing::internal::GetCapturedStdout().c_str());
 };
 
 TEST_F(ClassLoadingTest, callStaticMethod2) {
@@ -35,8 +35,8 @@ TEST_F(ClassLoadingTest, callStaticMethod2) {
 	testing::internal::CaptureStdout();
 	run(ClassLoadingTest::cf, getMethod());
 
-	EXPECT_EQ("Called static method in ClassLoadingTest2\n", 
-		testing::internal::GetCapturedStdout());
+	EXPECT_STREQ("Called static method in ClassLoadingTest2\n", 
+		testing::internal::GetCapturedStdout().c_str());
 };
 
 TEST_F(ClassLoadingTest, callStaticMethod3) {
@@ -46,6 +46,6 @@ TEST_F(ClassLoadingTest, callStaticMethod3) {
 	run(ClassLoadingTest::cf, getMethod());
 
 	EXPECT_EQ("Called static method in ClassLoadingTest3\n", 
-		testing::internal::GetCapturedStdout());
+		testing::internal::GetCapturedStdout().c_str());
 };
 

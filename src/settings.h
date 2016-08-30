@@ -6,7 +6,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include "log.h" // for LOG_LEVEL_* constants
+#include "log_levels.h" // for LOG_LEVEL_* constants
 
 /**
  * Only the messages with a log level equal to or larger than the current log

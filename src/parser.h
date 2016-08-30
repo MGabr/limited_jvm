@@ -1,3 +1,13 @@
+/**
+ * @file parser.h
+ * @author Markus Gabriel
+ * @brief Definitions for class file and internal VM structures
+ *
+ * Definitions of class file structures and internal custom structures used 
+ * throughout the whole virtual machine.
+ * Methods for parsing class files into these structures and loading classes
+ * in general.
+ */
 #ifndef PARSER_H
 #define PARSER_H
 
@@ -60,7 +70,7 @@ typedef int64_t i8;
 #define IS_NATIVE(method) (method->access_flags & ACC_NATIVE)
 
 struct r_methodref_info {
-	struct ClassFile *r_class; // cp?
+	struct ClassFile *r_class;
 	struct r_method_info *r_method;
 };
 
@@ -134,7 +144,7 @@ struct cp_info {
 		struct {
 			u4 first_bytes;
 			// u4 low_bytes; this field is saved right after the first byte
-			// overwritign parts of the next cp entry
+			// overwriting parts of the next cp entry
 		} double_info;
 
 		struct {
@@ -265,7 +275,32 @@ struct ClassFile {
 	struct ClassFile *next;
 };
 
+/**
+ * Parses the file with the given filename into a class file structure.
+ *
+ * @detail This is DEPRECATED, use load_class() instead
+ *
+ * @param filename the name of the file to parse into a class file structure
+ * @return the created class file
+ */
 extern struct ClassFile *parse(const char *filename);
+
+/**
+ * Loads the class with the given class name considering the classpath settings.
+ *
+ * @param classname the name of the class to load, can contain packages/paths
+ *                  separated by '/'
+ * @return the class structure
+ */
+extern struct ClassFile *load_class(const char *classname);
+
+/**
+ * Links a new, not already linked class to the existing classes.
+ *
+ * @param any_c any already linked class
+ * @param new_c the new class to link to the other existing classes
+ */
+extern void link_class(struct ClassFile *any_c, struct ClassFile *new_c);
 
 #endif
 

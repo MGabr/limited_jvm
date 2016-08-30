@@ -13,7 +13,6 @@
 #include "opcodes.h"
 #include "native.h"
 #include "log.h"
-#include "log_levels.h"
 #include "opcode_strings.h"
 #include "settings.h"
 
