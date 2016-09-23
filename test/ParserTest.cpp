@@ -13,6 +13,10 @@ class ParserTest : public ::testing::Test {
 	}
 	
 	static struct ClassFile *cf;
+
+	static void TearDownTestCase() {
+		free_class(cf);
+	}
 };
 
 struct ClassFile *ParserTest::cf = NULL;

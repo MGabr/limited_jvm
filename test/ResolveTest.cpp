@@ -13,6 +13,10 @@ class ResolveTest : public ::testing::Test {
 	}
 
 	struct ClassFile *cf;
+
+	virtual void TearDown() {
+		free_class(cf);
+	}
 };
 
 TEST_F(ResolveTest, resolveClassShouldReturnRightClass) {

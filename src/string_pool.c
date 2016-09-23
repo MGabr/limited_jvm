@@ -33,8 +33,34 @@ void init_string_pool(void)
 {
 	DEBUG("Entered %s\n", __func__);
 
-	// zero initialize, so all next pointers and all strings are NULL
-	hashtable = calloc(nr_string_buckets, sizeof(struct bucket));
+	if (hashtable == NULL) {
+		// zero initialize, so all next pointers and all strings are NULL
+		hashtable = calloc(nr_string_buckets, sizeof(struct bucket));
+	}
+}
+
+static void free_bucket(struct bucket *bucket)
+{
+	DEBUG("Entered %s\n", __func__);
+
+	if (bucket->next != NULL) {
+		free_bucket(bucket->next);
+	}
+	free(bucket);
+}
+
+void free_string_pool(void)
+{
+	DEBUG("Entered %s\n", __func__);
+
+	int i;
+	for (i = 0; i < nr_string_buckets; i++) {
+		if (hashtable[i].next != NULL) {
+			free_bucket(hashtable[i].next);
+		}
+	}
+	free(hashtable);
+	hashtable = NULL;
 }
 
 const char *add_string(const char *str)
@@ -55,6 +81,7 @@ const char *add_string(const char *str)
 		}
 	} while (b->next != NULL && (b = b->next));
 
+	// bucket collision
 	b->next = malloc(sizeof(struct bucket));
 	b->next->next = NULL;
 	b->next->str = str;

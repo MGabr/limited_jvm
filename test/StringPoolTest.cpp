@@ -10,12 +10,10 @@ class StringPoolTest : public ::testing::Test {
 	virtual void SetUp() {
 		init_string_pool();
 	}
-	/* string pool does not provide a function 
-	 * to free the memory for the underlying hash table,
-	 * since it is not needed by the vm
-	 *
-	 * we are intentionally allocating new memory every time 
-	 */
+
+	virtual void TearDown() {
+		free_string_pool();
+	}
 };
 
 TEST_F(StringPoolTest, doNotCopyString) {

@@ -167,6 +167,7 @@ struct Code_attribute **c_attr_to_set = NULL;
 // cyclic calls between parse_attribute and parse_Code_attribute
 static void parse_attribute(struct attribute_info *att, struct cp_info *cp, 
 	FILE *fp);
+static void free_attributes(struct attribute_info *att, u2 atts_count);
 
 static void parse_Code_attribute(struct Code_attribute *code,struct cp_info *cp,
 	FILE *fp)
@@ -182,6 +183,7 @@ static void parse_Code_attribute(struct Code_attribute *code,struct cp_info *cp,
 	read_e16(&code->max_locals, fp);
 
 	read_e32(&code->code_length, fp);
+	// TODO:
 	code->code = malloc(sizeof(u1) * code->code_length);
 	int i;
 	for (i = 0; i < code->code_length; i++) {
@@ -193,6 +195,7 @@ static void parse_Code_attribute(struct Code_attribute *code,struct cp_info *cp,
 	fseek(fp, code->exception_table_length * 4 * sizeof(u2), SEEK_CUR);
 
 	read_e16(&code->attributes_count, fp);
+	// TODO:
 	code->attributes = malloc (
 		sizeof(struct attribute_info) * code->attributes_count);
 	for (i = 0; i < code->attributes_count; i++) {
@@ -225,6 +228,11 @@ static void parse_attribute(struct attribute_info *att, struct cp_info *cp,
 	}
 }
 
+static void free_attribute(struct attribute_info *att)
+{
+	// TODO: refactor parse_attributes structure to save pointer to name string
+}
+
 static void parse_field(struct r_field_info *f, struct cp_info *cp, FILE *fp)
 {
 	DEBUG("Entered %s\n", __func__);
@@ -249,6 +257,12 @@ static void parse_field(struct r_field_info *f, struct cp_info *cp, FILE *fp)
 	for (i = 0; i < f->attributes_count; i++) {
 		parse_attribute(&f->attributes[i], cp, fp);
 	}
+}
+
+static void free_field(struct r_field_info *f)
+{
+	free_attributes(f->attributes, f->attributes_count);
+	free(f->attributes);
 }
 
 static void parse_method(struct r_method_info *m, struct cp_info *cp, FILE *fp)
@@ -279,6 +293,11 @@ static void parse_method(struct r_method_info *m, struct cp_info *cp, FILE *fp)
 	}
 }
 
+static void free_method(struct r_method_info *m)
+{
+	free_attributes(m->attributes, m->attributes_count);
+}
+
 static void parse_constant_pool(struct ClassFile *cf, FILE *fp)
 {
 	DEBUG("Entered %s\n", __func__);
@@ -290,6 +309,11 @@ static void parse_constant_pool(struct ClassFile *cf, FILE *fp)
 	for (i = 1; i < cf->constant_pool_count; i++) {
 		parse_constant(&cf->constant_pool[i], fp);
 	}
+}
+
+static void free_constant_pool(struct cp_info *cp)
+{
+	free(cp);
 }
 
 static void parse_interfaces(struct ClassFile *cf, FILE *fp)
@@ -304,6 +328,11 @@ static void parse_interfaces(struct ClassFile *cf, FILE *fp)
 	}
 }
 
+static void free_interfaces(u2 *interfaces)
+{
+	free(interfaces);
+}
+
 static void parse_fields(struct ClassFile *cf, FILE *fp)
 {
 	DEBUG("Entered %s\n", __func__);
@@ -314,6 +343,15 @@ static void parse_fields(struct ClassFile *cf, FILE *fp)
 	for (i = 0; i < cf->fields_count; i++) {
 		parse_field(&cf->fields[i], cf->constant_pool, fp);
 	}
+}
+
+static void free_fields(struct r_field_info *f, u2 fields_count)
+{
+	int i;
+	for (i = 0; i < fields_count; i++) {
+		free_field(&f[i]);
+	}
+	free(f);
 }
 
 static void parse_methods(struct ClassFile *cf, FILE *fp)
@@ -328,6 +366,15 @@ static void parse_methods(struct ClassFile *cf, FILE *fp)
 	}
 }
 
+static void free_methods(struct r_method_info *m, u2 methods_count)
+{
+	int i;
+	for (i = 0; i < methods_count; i++) {
+		free_method(&m[i]);
+	}
+	free(m);
+}
+
 static void parse_attributes(struct ClassFile *cf, FILE *fp)
 {
 	DEBUG("Entered %s\n", __func__);
@@ -339,6 +386,15 @@ static void parse_attributes(struct ClassFile *cf, FILE *fp)
 	for (i = 0; i < cf->attributes_count; i++) {
 		parse_attribute(&cf->attributes[i], cf->constant_pool, fp);
 	}
+}
+
+static void free_attributes(struct attribute_info *atts, u2 atts_count)
+{
+	int i;
+	for (i = 0; i < atts_count; i++) {
+		free_attribute(&atts[i]);
+	}
+	free(atts);
 }
 
 /**
@@ -418,16 +474,19 @@ struct ClassFile *load_class(const char *classname)
 		i++;
 	}
 	free(filename_w_classpath);
+	free(full_filename);
 
 	if (fp == NULL) {
 		ERROR("Error while trying to load class %s: %s\n",
-			full_filename, strerror(errno));
+			classname, strerror(errno));
 		exit(1);
 	}
 
-	const char *simple_name = strrchr(classname, '/') + 1;
+	const char *simple_name = strrchr(classname, '/');
 	if (simple_name == NULL) {
 		simple_name = classname;
+	} else {
+		simple_name += 1;
 	}
 
 	return parse_file(fp, simple_name);
@@ -437,5 +496,25 @@ void link_class(struct ClassFile *any_c, struct ClassFile *new_c)
 {
 	new_c->next = any_c->next;
 	any_c->next = new_c;
+}
+
+void free_class(struct ClassFile *cf)
+{
+	free_constant_pool(cf->constant_pool);
+	free_interfaces(cf->interfaces);
+	free_fields(cf->fields, cf->fields_count);
+	free_methods(cf->methods, cf->methods_count);
+	free_attributes(cf->attributes, cf->attributes_count);
+	free(cf);
+}
+
+void free_all_linked_classes(struct ClassFile *cf)
+{
+	struct ClassFile *curr_cf = cf;
+	struct ClassFile *next;
+	do {
+		next = curr_cf->next;
+		free_class(curr_cf);
+	} while ((curr_cf = next) != cf);
 }
 

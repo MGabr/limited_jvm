@@ -18,6 +18,10 @@ class SwitchTest : public ::testing::Test {
 	virtual struct r_method_info *getMethod(void) {
 		return get_main_method(cf);
 	}
+
+	virtual void TearDown() {
+		free_vm(cf);
+	}
 };
 
 

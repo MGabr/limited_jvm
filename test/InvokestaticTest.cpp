@@ -22,6 +22,10 @@ class InvokestaticTest : public ::testing::Test {
 	}
 
 	struct ClassFile *cf;
+
+	virtual void TearDown() {
+		free_vm(cf);
+	}
 };
 
 // many of the other tests are based on functionality tested here

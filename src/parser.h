@@ -302,5 +302,26 @@ extern struct ClassFile *load_class(const char *classname);
  */
 extern void link_class(struct ClassFile *any_c, struct ClassFile *new_c);
 
+/**
+ * Frees the given class structure.
+ *
+ * @detail Does not free any strings from the string pool and does currently
+ *		   also NOT UNLINK the class, so don't free classes linked to other
+ *		   classes still used by the VM. In most cases free_all_linked_classes()
+ *		   will be the more suitable method.
+ *
+ * @param cf the class structure to free
+ */
+extern void free_class(struct ClassFile *cf);
+
+/**
+ * Frees the given class structure and all classes linked to it.
+ *
+ * @detail Does not free any strings from the string pool.
+ *
+ * @param cf the class structure to free 
+ */
+extern void free_all_linked_classes(struct ClassFile *cf);
+
 #endif
 

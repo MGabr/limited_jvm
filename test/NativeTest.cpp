@@ -8,14 +8,20 @@ extern "C" {
 class NativeTest : public ::testing::Test {
 
 	protected:
-	static void SetUpTestCase() {
-		struct ClassFile *cf = parse("classes/HelloWorld");
+	virtual void SetUp() {
+		cf = parse("classes/HelloWorld");
 		println_m = &cf->methods[1];
 
 		init_natives();
 	}
 
+	struct ClassFile *cf;
+
 	static struct r_method_info *println_m;
+
+	virtual void TearDown() {
+		free_class(cf);
+	}
 };
 
 struct r_method_info *NativeTest::println_m = NULL;

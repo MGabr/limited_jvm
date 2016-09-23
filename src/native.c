@@ -26,7 +26,7 @@ void init_natives(void) {
 };
 
 void call_native(struct r_method_info *method, u4 *optop) {
-	DEBUG("Entered %s\n", __func__);
+	DEBUG("Entered %s(method->name=%s)\n", __func__, method->name);
 
 	if (method->name == println_str) {
 		println(*(const char **) optop);

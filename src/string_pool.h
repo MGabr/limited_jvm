@@ -10,9 +10,17 @@
 /**
  * Initialize the string pool.
  *
- * @detail Should only be called once or memory will leak
+ * @detail Does nothing if the string pool has already been initialized
  */
 extern void init_string_pool(void);
+
+/**
+ * Frees the string pool.
+ *
+ * @detail Does not free the strings in the string pool, since they might not be
+ *		   allocated with malloc(), e.g. string literals
+ */
+extern void free_string_pool(void);
 
 /**
  * Add a string to the string pool.

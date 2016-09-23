@@ -20,12 +20,11 @@ void java(int argc, const char **argv) {
 		exit(1);
 	}
 
-	print_portability_warnings();
+//	print_portability_warnings();
 
 	struct ClassFile *cf = parse(argv[1]);
-	struct r_method_info *main_m = get_main_method(cf);
 
-	run(cf, main_m);
+	run_main(cf);
 }
 
 STATIC int main(int argc, const char **argv) {

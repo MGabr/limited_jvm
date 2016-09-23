@@ -17,7 +17,7 @@
 #include "settings.h"
 
 #if LOG_LEVEL <= LOG_LEVEL_DEBUG
-	#define DEBUG(...) printf( __VA_ARGS__)
+	#define DEBUG(...) printf(__VA_ARGS__)
 #else
 	#define DEBUG(...)
 #endif

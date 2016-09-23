@@ -4,6 +4,7 @@
 #include <sys/mman.h>
 #include <math.h>
 #include <fenv.h>
+#include <errno.h>
 
 #include "parser.h"
 #include "options.h"
@@ -88,18 +89,36 @@ struct r_method_info *get_main_method(struct ClassFile *c)
 	return mi;
 }
 
+static void *stack_start;
+
 static void *allocate_stack(void)
 {
 	DEBUG("Entered %s\n", __func__);
+
+	if (stack_start != NULL) {
+		ERROR("Can not allocate space for stack: Already allocated space for stack.\n");
+	}
 
 	void *stack = mmap(NULL, stack_size, PROT_READ | PROT_WRITE, 
 		MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (stack == MAP_FAILED) {
 		ERROR("Can not run program: Could not allocate space for stack.\n");
+		exit(1);
 	}
+
+	stack_start = stack;
 	return stack;
 }
 
+static void free_stack()
+{
+	DEBUG("Entered %s\n", __func__);
+
+	if (munmap(stack_start, stack_size)) {
+		WARN("Can not free stack: %s\n", strerror(errno));
+	}
+	stack_start = NULL;
+}
 
 #define TWO_BYTE_INDEX(pc) (((u2) *pc) << 8 | *(pc + 1))
 #define FOUR_BYTE_INDEX(pc) ((i4) (((u4) *((u1 *) (pc))) << 24 \
@@ -1267,9 +1286,17 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	impdep1:
 		// opcode reserved for implementation dependent debugger operations
 		// we use this as simple exit
+		free_vm(c);
 		return;
 
 }
+
+void free_vm(struct ClassFile *main_c)
+{
+		free_stack();
+		free_all_linked_classes(main_c);
+		free_string_pool();
+} 
 
 void run_main(struct ClassFile *c)
 {

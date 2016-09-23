@@ -39,5 +39,14 @@ void run_main(struct ClassFile *c);
  */
 struct r_method_info *get_main_method(struct ClassFile *c);
 
+/**
+ * Frees all the memory and internal structures used by the virtual machine.
+ *
+ * @detail also frees all classes linked to the main class (and the main class)
+ *
+ * @param main_c the main class
+ */
+void free_vm(struct ClassFile *main_c);
+
 #endif
 

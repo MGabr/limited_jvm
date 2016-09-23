@@ -33,6 +33,10 @@ class LdcTest : public ::testing::Test {
 		m->c_attr->code = code_ldc2;
 		return m;
 	}
+
+	virtual void TearDown() {
+		free_vm(cf);
+	}
 };
 
 TEST_F(LdcTest, ldc1ShouldPush) {
