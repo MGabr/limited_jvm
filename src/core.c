@@ -432,7 +432,6 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		pc += 2;
 		NEXT();
 	ldc2w:
-		// TODO: TEST
 		index = TWO_BYTE_INDEX(pc);
 		*((u8 *) ++optop) = *((u8 *) &cp[index].longOrDouble_info.first_bytes);
 		++optop;
@@ -1293,13 +1292,15 @@ void run(struct ClassFile *c, struct r_method_info *main)
 
 void free_vm(struct ClassFile *main_c)
 {
-		free_stack();
-		free_all_linked_classes(main_c);
-		free_string_pool();
+	DEBUG("Entered %s\n", __func__);
+	free_stack();
+	free_all_linked_classes(main_c);
+	free_string_pool();
 } 
 
 void run_main(struct ClassFile *c)
 {
+	DEBUG("Entered %s\n", __func__);
 	run(c, get_main_method(c));
 }
 

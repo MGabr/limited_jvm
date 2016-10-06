@@ -494,12 +494,16 @@ struct ClassFile *load_class(const char *classname)
 
 void link_class(struct ClassFile *any_c, struct ClassFile *new_c)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	new_c->next = any_c->next;
 	any_c->next = new_c;
 }
 
 void free_class(struct ClassFile *cf)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	free_constant_pool(cf->constant_pool);
 	free_interfaces(cf->interfaces);
 	free_fields(cf->fields, cf->fields_count);
@@ -510,6 +514,8 @@ void free_class(struct ClassFile *cf)
 
 void free_all_linked_classes(struct ClassFile *cf)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	struct ClassFile *curr_cf = cf;
 	struct ClassFile *next;
 	do {

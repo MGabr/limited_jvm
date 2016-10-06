@@ -73,12 +73,12 @@ struct r_methodref_info *resolve_methodref(struct ClassFile *c, u2 index)
 		= cp[signature_index].r_nameAndType_info.signature_str;
 
 	int i;
-	struct r_method_info m;
+	struct r_method_info *m;
 	for (i = 0; i < m_class->methods_count; i++) {
-		m = m_class->methods[i];
-		if (m.name == m_name && m.signature == m_signature) {
+		m = &m_class->methods[i];
+		if (m->name == m_name && m->signature == m_signature) {
 			cp[index].r_methodref_info.r_class = m_class;
-			cp[index].r_methodref_info.r_method = &m;
+			cp[index].r_methodref_info.r_method = m;
 			cp[index].tag = RESOLVED_Methodref;
 			return &cp[index].r_methodref_info;
 		}
@@ -114,12 +114,12 @@ struct r_fieldref_info *resolve_fieldref(struct ClassFile *c, u2 index)
 		= cp[signature_index].r_nameAndType_info.signature_str;
 
 	int i;
-	struct r_field_info f;
+	struct r_field_info *f;
 	for (i = 0; i < f_class->fields_count; i++) {
-		f = f_class->fields[i];
-		if (f.name == f_name && f.signature == f_signature) {
+		f = &f_class->fields[i];
+		if (f->name == f_name && f->signature == f_signature) {
 			cp[index].r_fieldref_info.r_class = f_class;
-			cp[index].r_fieldref_info.r_field = &f;
+			cp[index].r_fieldref_info.r_field = f;
 			cp[index].tag = RESOLVED_Fieldref;
 			return &cp[index].r_fieldref_info;
 		}
