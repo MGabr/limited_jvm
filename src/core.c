@@ -426,9 +426,11 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		NEXT();
 	lconst_0:
 		*((u8 *) ++optop) = 0l;
+		optop++;
 		NEXT();
 	lconst_1:
 		*((u8 *) ++optop) = 1l;
+		optop++;
 		NEXT();
 	fconst_0:
 		*((float *) ++optop) = 0.0f;
@@ -441,9 +443,11 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		NEXT();
 	dconst_0:
 		*((double *) ++optop) = 0.0;
+		optop++;
 		NEXT();
 	dconst_1:
 		*((double *) ++optop) = 1.0; 
+		optop++;
 		NEXT();
 	bipush:
 		*++optop = (i1) *pc++;
@@ -1263,8 +1267,8 @@ void run(struct ClassFile *c, struct r_method_info *main)
 
 			case 'D':
 			case 'L':
-				*++optop = f_block->byte2;
 				*++optop = f_block->byte1;
+				*++optop = f_block->byte2;
 				break;
 
 			// arrays and objects currently not supported
