@@ -57,10 +57,13 @@ struct r_methodref_info *resolve_methodref(struct ClassFile *c, u2 index)
 
 	struct cp_info *cp = c->constant_pool;
 
-	struct ClassFile *m_class = c;
+	struct ClassFile *m_class;
 
-	if (!IS_RESOLVED(cp, cp[index].methodref_info.class_index)) {
-		m_class = resolve_class(c, cp[index].methodref_info.class_index);
+	int class_index = cp[index].methodref_info.class_index;
+	if (!IS_RESOLVED(cp, class_index)) {
+		m_class = resolve_class(c, class_index);
+	} else {
+		m_class = cp[class_index].r_class_info.r_class;
 	}
 	
 	int signature_index = cp[index].methodref_info.name_and_type_index;
@@ -98,10 +101,13 @@ struct r_fieldref_info *resolve_fieldref(struct ClassFile *c, u2 index)
 
 	struct cp_info *cp = c->constant_pool;
 
-	struct ClassFile *f_class = c;
+	struct ClassFile *f_class;
 
-	if (!IS_RESOLVED(cp, cp[index].fieldref_info.class_index)) {
-		f_class = resolve_class(c, cp[index].fieldref_info.class_index); 
+	int class_index = cp[index].fieldref_info.class_index;
+	if (!IS_RESOLVED(cp, class_index)) {
+		f_class = resolve_class(c, class_index); 
+	} else {
+		f_class = cp[class_index].r_class_info.r_class;
 	}
 
 	int signature_index = cp[index].fieldref_info.name_and_type_index;

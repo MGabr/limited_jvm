@@ -230,6 +230,8 @@ static void parse_attribute(struct attribute_info *att, struct cp_info *cp,
 
 static void free_attribute(struct attribute_info *att)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	// TODO: refactor parse_attributes structure to save pointer to name string
 }
 
@@ -261,8 +263,9 @@ static void parse_field(struct r_field_info *f, struct cp_info *cp, FILE *fp)
 
 static void free_field(struct r_field_info *f)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	free_attributes(f->attributes, f->attributes_count);
-	free(f->attributes);
 }
 
 static void parse_method(struct r_method_info *m, struct cp_info *cp, FILE *fp)
@@ -295,6 +298,8 @@ static void parse_method(struct r_method_info *m, struct cp_info *cp, FILE *fp)
 
 static void free_method(struct r_method_info *m)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	free_attributes(m->attributes, m->attributes_count);
 }
 
@@ -313,6 +318,8 @@ static void parse_constant_pool(struct ClassFile *cf, FILE *fp)
 
 static void free_constant_pool(struct cp_info *cp)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	free(cp);
 }
 
@@ -330,6 +337,8 @@ static void parse_interfaces(struct ClassFile *cf, FILE *fp)
 
 static void free_interfaces(u2 *interfaces)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	free(interfaces);
 }
 
@@ -347,6 +356,8 @@ static void parse_fields(struct ClassFile *cf, FILE *fp)
 
 static void free_fields(struct r_field_info *f, u2 fields_count)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	int i;
 	for (i = 0; i < fields_count; i++) {
 		free_field(&f[i]);
@@ -368,6 +379,8 @@ static void parse_methods(struct ClassFile *cf, FILE *fp)
 
 static void free_methods(struct r_method_info *m, u2 methods_count)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	int i;
 	for (i = 0; i < methods_count; i++) {
 		free_method(&m[i]);
@@ -390,6 +403,8 @@ static void parse_attributes(struct ClassFile *cf, FILE *fp)
 
 static void free_attributes(struct attribute_info *atts, u2 atts_count)
 {
+	DEBUG("Entered %s\n", __func__);
+
 	int i;
 	for (i = 0; i < atts_count; i++) {
 		free_attribute(&atts[i]);
@@ -405,9 +420,9 @@ static void free_attributes(struct attribute_info *atts, u2 atts_count)
  *                  without the .class file ending)
  * @return the created class file
  */
-static struct ClassFile *parse_file(FILE *fp, const char *simple_name)
+static struct ClassFile *parse_file(FILE *fp)
 {
-	DEBUG("Entered %s(fp, simple_name=%s)\n", __func__, simple_name);
+	DEBUG("Entered %s(fp)\n", __func__);
 
 	struct ClassFile *cf = malloc(sizeof(struct ClassFile));
 
@@ -429,6 +444,7 @@ static struct ClassFile *parse_file(FILE *fp, const char *simple_name)
 	parse_constant_pool(cf, fp);	
 
 	read_e16(&cf->access_flags, fp);
+	// TODO: resolve and get name from that
 	read_e16(&cf->this_class, fp);
 	read_e16(&cf->super_class, fp);
 
@@ -438,8 +454,12 @@ static struct ClassFile *parse_file(FILE *fp, const char *simple_name)
 
 	parse_attributes(cf, fp);
 
-	cf->name = add_string(simple_name);
+	struct cp_info *cp = cf->constant_pool;
+	const char *c_name = cp[cp[cf->this_class].class_info.name_index]
+		.r_string_info.str;
+	cf->name = add_string(c_name);
 	cf->next = cf; // cyclic list
+	cf->static_initialized = 0;
 
 	return cf;
 }
@@ -482,14 +502,7 @@ struct ClassFile *load_class(const char *classname)
 		exit(1);
 	}
 
-	const char *simple_name = strrchr(classname, '/');
-	if (simple_name == NULL) {
-		simple_name = classname;
-	} else {
-		simple_name += 1;
-	}
-
-	return parse_file(fp, simple_name);
+	return parse_file(fp);
 }
 
 void link_class(struct ClassFile *any_c, struct ClassFile *new_c)

@@ -273,6 +273,7 @@ struct ClassFile {
 
 	const char *name;
 	struct ClassFile *next;
+	u1 static_initialized;
 };
 
 /**

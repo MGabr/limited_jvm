@@ -18,7 +18,7 @@
 #include "settings.h"
 
 #ifdef _LOG_INSTRS_
-	#define LOG_INSTR printf("- %s\n", opcode_strings[*pc])
+	#define LOG_INSTR fprintf(stderr, "- %s\n", opcode_strings[*pc])
 #else
 	#define LOG_INSTR 
 #endif
@@ -49,6 +49,13 @@ if (instrs_counter == 0) {\
 instrs_counter++;\
 LOG_INSTR;\
 goto *table[*pc++];
+
+	#define NEXT_AFTER_INITIALIZE_STATIC() \
+if (instrs_counter == 0) {\
+	NEXT();\
+} else {\
+	goto *table[*pc++];\
+}
 #endif
 
 /* =============================================================== */
@@ -118,6 +125,29 @@ static void free_stack()
 		WARN("Can not free stack: %s\n", strerror(errno));
 	}
 	stack_start = NULL;
+}
+
+static struct r_method_info *get_static_constructor(struct ClassFile *c)
+{
+	DEBUG("Entered %s\n", __func__);
+
+	int i;
+	struct r_method_info *mi;
+
+	const char *clinit_str = find_string("<clinit>");
+	if (clinit_str == NULL) {
+		// class does not need to be initialized
+		return NULL;
+	}
+
+	for (i = 0; i < c->methods_count; i++) {
+		mi = &c->methods[i];
+		if (mi->name == clinit_str) {
+			break;
+		}
+	}
+
+	return mi;
 }
 
 #define TWO_BYTE_INDEX(pc) (((u2) *pc) << 8 | *(pc + 1))
@@ -350,7 +380,11 @@ void run(struct ClassFile *c, struct r_method_info *main)
 
 	// ------------- execute instructions ---------------------------
 
-	NEXT();
+	// local variable that has to be set before calling initialize_static 
+	struct ClassFile *clinit_c = c;
+	clinit_c->static_initialized = 1;
+
+	goto initialize_static;
 
 	// some local variables used in the goto blocks
 	// NOT used for side effects over different goto blocks
@@ -361,6 +395,8 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	i4 low;
 	struct r_fieldref_info *f;
 	struct r_field_info *f_block;
+	struct r_method_info *m_block;
+	struct Code_attribute *c_attr;
 
 	nop:
 		// do nothing
@@ -1198,10 +1234,21 @@ void run(struct ClassFile *c, struct r_method_info *main)
 
 		NEXT();
 	getstatic:
+		index = TWO_BYTE_INDEX(pc);
+		pc += 2;
 		if (!IS_RESOLVED(cp, index)) {
 			resolve_fieldref(c, index);
 		}
 		f = &cp[index].r_fieldref_info;
+		
+		// in case we loaded a new class and need to initialize it
+		if (!f->r_class->static_initialized) {
+			pc -= 3; // we want to call getstatic again after the constructor
+			clinit_c = f->r_class;
+			f->r_class->static_initialized = 1;
+			goto initialize_static;
+		}
+
 		f_block = f->r_field;
 		
 		switch (*f_block->signature) {
@@ -1224,10 +1271,21 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		}
 		NEXT();
 	putstatic:
+		index = TWO_BYTE_INDEX(pc);
+		pc += 2;
 		if (!IS_RESOLVED(cp, index)) {
 			resolve_fieldref(c, index);
 		}
 		f = &cp[index].r_fieldref_info;
+
+		// in case we loaded a new class and need to initialize it
+		if (!f->r_class->static_initialized) {
+			pc -= 3; // we want to call putstatic again after the constructor
+			clinit_c = f->r_class;
+			f->r_class->static_initialized = 1;
+			goto initialize_static;
+		}
+
 		f_block = f->r_field;
 
 		switch (*f_block->signature) {
@@ -1258,8 +1316,17 @@ void run(struct ClassFile *c, struct r_method_info *main)
 			resolve_methodref(c, index);
 		}
 		struct r_methodref_info *m = &cp[index].r_methodref_info;
-		struct r_method_info *m_block = m->r_method;
-		struct Code_attribute *c_attr = m_block->c_attr;
+		
+		// in case we loaded a new class and need to initialize it
+		if (!m->r_class->static_initialized) {
+			pc -= 3; // we want to call invokestatic again after the constructor
+			clinit_c = m->r_class;
+			m->r_class->static_initialized = 1;
+			goto initialize_static;
+		}
+
+		m_block = m->r_method;
+		c_attr = m_block->c_attr;
 
 		if (IS_NATIVE(m_block)) {
 			call_native(m_block, optop);
@@ -1281,6 +1348,32 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		localc = c_attr->max_locals;	
 
 		NEXT();
+
+	// custom method, clinit_c has to be set before
+	initialize_static:
+		m_block = get_static_constructor(clinit_c);
+		if (m_block == NULL) {
+			// class does not need to be initialized
+			NEXT_AFTER_INITIALIZE_STATIC();
+		}
+ 
+		c_attr = m_block->c_attr;
+
+		tmp_frame = optop + 1 - m_block->nargs;
+
+		optop += c_attr->max_locals - m_block->nargs;
+		*++optop = (u4) localc;
+		*++optop = (u4) frame;
+		*++optop = (u4) pc;
+		*++optop = (u4) c;
+
+		pc = c_attr->code;
+		c = clinit_c;
+		cp = clinit_c->constant_pool;
+		frame = tmp_frame;
+		localc = c_attr->max_locals;
+
+		NEXT_AFTER_INITIALIZE_STATIC();
 
 	impdep1:
 		// opcode reserved for implementation dependent debugger operations

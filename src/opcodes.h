@@ -167,7 +167,7 @@
 #define GETSTATIC (178)
 #define PUTSTATIC (179)
 
-// field access and function invocation
+// object field access and function invocation
 
 #define INVOKENONVIRTUAL (183)
 #define INVOKESTATIC (184)
