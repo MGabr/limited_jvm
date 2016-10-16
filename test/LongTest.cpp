@@ -43,14 +43,14 @@ TEST_F(LongTest, lconst0) {
 	instrs_until_terminate = 7;
 	run(LongTest::cf, getMethod());
 
-	EXPECT_EQ(0L, *((i8 *) state.optop));
+	EXPECT_EQ(0L, *((i8 *) (state.optop - 1)));
 };
 
 TEST_F(LongTest, lconst1) {
 	instrs_until_terminate = 9;
 	run(LongTest::cf, getMethod());
 
-	EXPECT_EQ(1L, *((i8 *) state.optop));
+	EXPECT_EQ(1L, *((i8 *) (state.optop - 1)));
 };
 
 

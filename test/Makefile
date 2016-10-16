@@ -5,10 +5,7 @@ GTEST_HOME=~/usr/gtest
 all:
 	make Tests
 
-Tests: ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o SignatureTest.o ResolveTest.o InvokestaticTest.o NativeTest.o HelloWorldTest.o IntegerTest.o IntegerNegativeTest.o IntegerLogicalTest.o ControlTest.o CompareControlTest.o FloatTest.o DoubleTest.o LongTest.o CastTest.o ReturnTest.o CompareTest.o FactorialTest.o PrintPrimitivesTest.o StaticTest.o StaticDoubleTest.o ../src/parser.o ../src/string_pool.o LongLogicalTest.o SwitchTest.o ClassLoadingTest.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o ../src/signature.o ../src/native.o ../src/java.o ../src/warn.o ../src/opcode_strings.o
-	make ParserTest.o
-	make StringPoolTest.o
-	make StringPoolConflictTest.o
+Tests: ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o SignatureTest.o ResolveTest.o InvokestaticTest.o NativeTest.o HelloWorldTest.o IntegerTest.o IntegerNegativeTest.o IntegerLogicalTest.o ControlTest.o CompareControlTest.o FloatTest.o DoubleTest.o LongTest.o CastTest.o ReturnTest.o CompareTest.o FactorialTest.o PrintPrimitivesTest.o StaticTest.o StaticDoubleTest.o ArrayTest.o PrimitivesArrayTest.o SwitchPrintTest.o ../src/parser.o ../src/string_pool.o LongLogicalTest.o ClassLoadingTest.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o ../src/signature.o ../src/native.o ../src/java.o ../src/warn.o ../src/opcode_strings.o
 	g++ ${FLAGS} -o $@ Tests.cpp $^ ${LIBS}
 
 ParserTest.o: HelloWorld.class
@@ -149,12 +146,6 @@ LongLogicalTest.o: LongLogicalTest.class
 LongLogicalTest.class:
 	cd java && javac LongLogicalTest.java && mv $@ ../classes/.
 
-SwitchTest.o: SwitchTest.class
-	g++ ${FLAGS} -c SwitchTest.cpp ${LIBS}
-
-SwitchTest.class:
-	cd java && javac SwitchTest.java && mv $@ ../classes/.
-
 ClassLoadingTest.o: ClassLoadingTest.class ClassLoadingTest2.class ClassLoadingTest3.class
 	g++ ${FLAGS} -c ClassLoadingTest.cpp ${LIBS}
 
@@ -206,6 +197,24 @@ StaticDoubleTest2.class:
 StaticDoubleTest3.class:
 	cd java/apackage && javac StaticDoubleTest3.java && mv $@ ../../classes/apackage/.
 
+ArrayTest.o: ArrayTest.class
+	g++ ${FLAGS} -c ArrayTest.cpp ${LIBS}
+
+ArrayTest.class:
+	cd java && javac ArrayTest.java && mv $@ ../classes/.
+
+PrimitivesArrayTest.o: PrimitivesArrayTest.class
+	g++ ${FLAGS} -c PrimitivesArrayTest.cpp ${LIBS}
+
+PrimitivesArrayTest.class:
+	cd java && javac PrimitivesArrayTest.java && mv $@ ../classes/.
+
+SwitchPrintTest.o: SwitchPrintTest.class
+	g++ ${FLAGS} -c SwitchPrintTest.cpp ${LIBS}
+
+SwitchPrintTest.class:
+	cd java && javac SwitchPrintTest.java && mv $@ ../classes/.
+
 clean:
-	rm classes/*.class classes/apackage/*.class Tests ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o SignatureTest.o ResolveTest.o InvokestaticTest.o NativeTest.o HelloWorldTest.o IntegerTest.o IntegerNegativeTest.o IntegerLogicalTest.o ControlTest.o CompareControlTest.o FloatTest.o DoubleTest.o LongTest.o CastTest.o ReturnTest.o CompareTest.o LongLogicalTest.o SwitchTest.o ClassLoadingTest.o FactorialTest.o PrintPrimitivesTest.o StaticTest.o StaticDoubleTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o ../src/signature.o ../src/native.o ../src/java.o ../src/warn.o ../src/opcode_strings.o
+	rm classes/*.class classes/apackage/*.class Tests ParserTest.o StringPoolTest.o StringPoolConflictTest.o MainTest.o LdcTest.o SignatureTest.o ResolveTest.o InvokestaticTest.o NativeTest.o HelloWorldTest.o IntegerTest.o IntegerNegativeTest.o IntegerLogicalTest.o ControlTest.o CompareControlTest.o FloatTest.o DoubleTest.o LongTest.o CastTest.o ReturnTest.o CompareTest.o LongLogicalTest.o ClassLoadingTest.o FactorialTest.o PrintPrimitivesTest.o StaticTest.o StaticDoubleTest.o ArrayTest.o PrimitivesArrayTest.o SwitchPrintTest.o ../src/parser.o ../src/string_pool.o ../src/options.o ../src/core.o ../src/resolve.o ../src/testmode.o ../src/signature.o ../src/native.o ../src/java.o ../src/warn.o ../src/opcode_strings.o
 

@@ -43,14 +43,14 @@ TEST_F(DoubleTest, dconst0) {
 	instrs_until_terminate = 7;
 	run(DoubleTest::cf, getMethod());
 
-	EXPECT_EQ(0.0, *((double *) state.optop));
+	EXPECT_EQ(0.0, *((double *) (state.optop - 1)));
 };
 
 TEST_F(DoubleTest, dconst1) {
 	instrs_until_terminate = 9;
 	run(DoubleTest::cf, getMethod());
 
-	EXPECT_EQ(1.0, *((double *) state.optop));
+	EXPECT_EQ(1.0, *((double *) (state.optop - 1)));
 };
 
 

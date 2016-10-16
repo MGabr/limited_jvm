@@ -37,6 +37,7 @@ if (instrs_counter == 0) {\
 	start_state.optop = optop;\
 	start_state.localc = localc;\
 } else if (instrs_counter == instrs_until_terminate) {\
+	instrs_until_terminate = 0;\
 	instrs_counter = 0;\
 	state.pc = pc;\
 	state.c = c;\
@@ -150,7 +151,13 @@ static struct r_method_info *get_static_constructor(struct ClassFile *c)
 	return mi;
 }
 
-#define TWO_BYTE_INDEX(pc) (((u2) *pc) << 8 | *(pc + 1))
+struct array {
+	u4 length;
+	void *arr;
+};
+
+#define TWO_BYTE_INDEX(pc) ((i2) (((u2) *((u1 *) (pc))) << 8 \
+	| *((u1 *) (pc) + 1)))
 #define FOUR_BYTE_INDEX(pc) ((i4) (((u4) *((u1 *) (pc))) << 24 \
 	| ((u4) *((u1 *) (pc) + 1)) << 16 \
 	| ((u4) *((u1 *) (pc) + 2)) << 8 \
@@ -256,10 +263,18 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[ALOAD_1] = &&aload_1;
 	table[ALOAD_2] = &&aload_2;
 	table[ALOAD_3] = &&aload_3;
+	table[IALOAD] = &&iaload;
+	table[LALOAD] = &&laload;
+	table[FALOAD] = &&faload;
+	table[DALOAD] = &&daload;
+	table[BALOAD] = &&baload;
+	table[CALOAD] = &&caload;
+	table[SALOAD] = &&saload;
 	table[ISTORE] = &&istore;
 	table[LSTORE] = &&lstore;
 	table[FSTORE] = &&fstore;
 	table[DSTORE] = &&dstore;
+	table[ASTORE] = &&astore;
 	table[ISTORE_0] = &&istore_0;
 	table[ISTORE_1] = &&istore_1;
 	table[ISTORE_2] = &&istore_2;
@@ -276,6 +291,17 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[DSTORE_1] = &&dstore_1;
 	table[DSTORE_2] = &&dstore_2;
 	table[DSTORE_3] = &&dstore_3;
+	table[ASTORE_0] = &&astore_0;
+	table[ASTORE_1] = &&astore_1;
+	table[ASTORE_2] = &&astore_2;
+	table[ASTORE_3] = &&astore_3;
+	table[IASTORE] = &&iastore;
+	table[LASTORE] = &&lastore;
+	table[FASTORE] = &&fastore;
+	table[DASTORE] = &&dastore;
+	table[BASTORE] = &&bastore;
+	table[CASTORE] = &&castore;
+	table[SASTORE] = &&sastore;
 	table[POP] = &&pop;
 	table[POP2] = &&pop2;
 	table[DUP] = &&dup;
@@ -361,11 +387,14 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	table[LRETURN] = &&lreturn;
 	table[FRETURN] = &&freturn;
 	table[DRETURN] = &&dreturn;
+	table[ARETURN] = &&areturn;
 	table[RETURN] = &&_return;
 	table[GETSTATIC] = &&getstatic;
 	table[PUTSTATIC] = &&putstatic;
 	table[INVOKENONVIRTUAL] = &&invokenonvirtual;
 	table[INVOKESTATIC] = &&invokestatic;
+	table[NEWARRAY] = &&newarray;
+	table[ARRAYLENGTH] = &&arraylength;
 	table[IMPDEP1] = &&impdep1;
 
 	// initialize set of predefined native method
@@ -397,6 +426,7 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	struct r_field_info *f_block;
 	struct r_method_info *m_block;
 	struct Code_attribute *c_attr;
+	u4 tmp_u4;
 
 	nop:
 		// do nothing
@@ -492,6 +522,8 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		optop++;
 		NEXT();
 	aload:
+		*++optop = *(frame + *pc++);
+		NEXT();
 	iload_0:
 		*++optop = *frame;
 		NEXT();
@@ -549,15 +581,110 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		optop++;
 		NEXT();
 	aload_0:
+		*++optop = *frame;
+		NEXT();
 	aload_1:
+		*++optop = *(frame + 1);
+		NEXT();
 	aload_2:
+		*++optop = *(frame + 2);
+		NEXT();
 	aload_3:
+		*++optop = *(frame + 3);
+		NEXT();
+	iaload:
+		if (*(optop - 1) == 0) {
+			ERROR("NullPointerException\n");
+			exit(1);
+		}
+		if (*optop >= ((struct array *) *(optop - 1))->length || *optop < 0) {
+			ERROR("ArrayIndexOutOfBoundsException\n");
+			exit(1);
+		}
+		*(optop - 1) = ((u4 *) ((struct array *) *(optop - 1))->arr)[*optop];
+		optop--;
+		NEXT();
+	laload:
+		if (*(optop - 1) == 0) {
+			ERROR("NullPointerException\n");
+			exit(1);
+		}
+		if (*optop >= ((struct array *) *(optop - 1))->length || *optop < 0) {
+			ERROR("ArrayIndexOutOfBoundsException\n");
+			exit(1);
+		}
+		*(u8 *) (optop - 1)
+			= ((u8 *) ((struct array *) *(optop - 1))->arr)[*optop];
+		NEXT();
+	faload:
+		if (*(optop - 1) == 0) {
+			ERROR("NullPointerException\n");
+			exit(1);
+		}
+		if (*optop >= ((struct array *) *(optop - 1))->length || *optop < 0) {
+			ERROR("ArrayIndexOutOfBoundsException\n");
+			exit(1);
+		}
+		*(float *) (optop - 1)
+			= ((float *) ((struct array *) *(optop - 1))->arr)[*optop];
+		optop--;
+		NEXT();
+	daload:
+		if (*(optop - 1) == 0) {
+			ERROR("NullPointerException\n");
+			exit(1);
+		}
+		if (*optop >= ((struct array *) *(optop - 1))->length || *optop < 0) {
+			ERROR("ArrayIndexOutOfBoundsException\n");
+			exit(1);
+		}
+		*(double *) (optop - 1)
+			= ((double *) ((struct array *) *(optop - 1))->arr)[*optop];
+		NEXT();
+
+	baload:
+		if (*(optop - 1) == 0) {
+			ERROR("NullPointerException\n");
+			exit(1);
+		}
+		if (*optop >= ((struct array *) *(optop - 1))->length || *optop < 0) {
+			ERROR("ArrayIndexOutOfBoundsException\n");
+			exit(1);
+		}
+		*(optop - 1) = ((u1 *) ((struct array *) *(optop - 1))->arr)[*optop];
+		optop--;
+		NEXT();
+	caload:
+		if (*(optop - 1) == 0) {
+			ERROR("NullPointerException\n");
+			exit(1);
+		}
+		if (*optop >= ((struct array *) *(optop - 1))->length || *optop < 0) {
+			ERROR("ArrayIndexOutOfBoundsException\n");
+			exit(1);
+		}
+		*(optop - 1) = ((u1 *) ((struct array *) *(optop - 1))->arr)[*optop];
+		optop--;
+		NEXT();
+	saload:
+		if (*(optop - 1) == 0) {
+			ERROR("NullPointerException\n");
+			exit(1);
+		}
+		if (*optop >= ((struct array *) *(optop - 1))->length || *optop < 0) {
+			ERROR("ArrayIndexOutOfBoundsException\n");
+			exit(1);
+		}
+		*(optop - 1) = ((u2 *) ((struct array *) *(optop - 1))->arr)[*optop];
+		optop--;
+		NEXT();
 
 	istore:
 		*(frame + *pc++) = *optop--;
 		NEXT();
 	lstore:
 		*((u8 *) (frame + *pc++)) = *((u8 *) (optop - 1));
+		optop -= 2;
 		NEXT();
 	fstore:
 		*(frame + *pc++) = *optop--;
@@ -566,7 +693,9 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		*((double *) (frame + *pc++)) = *((double *) (optop - 1));
 		optop -= 2;
 		NEXT();
-
+	astore:
+		*(frame + *pc++) = *optop--;
+		NEXT();
 	istore_0:
 		*frame = *optop--;
 		NEXT();
@@ -623,7 +752,123 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		*((double *) (frame + 3)) = *((double *) (optop - 1));
 		optop -= 2;
 		NEXT();
+	astore_0:
+		*frame = *optop--;
+		NEXT();
+	astore_1:
+		*(frame + 1) = *optop--;
+		NEXT();
+	astore_2:
+		*(frame + 2) = *optop--;
+		NEXT();
+	astore_3:
+		*(frame + 3) = *optop--;
+		NEXT();
+	iastore:
+		if (*(optop - 2) == 0) {
+			ERROR("NullPointerException\n");
+			exit(1);
+		}
+		if (*(optop - 1) >= ((struct array *) *(optop - 2))->length
+			|| *(optop - 1) < 0) {
 
+			ERROR("ArrayIndexOutOfBoundsException\n");
+			exit(1);
+		}
+		((u4 *) ((struct array *) *(optop - 2))->arr)[*(optop - 1)] = *optop;
+		optop -= 3;
+		NEXT();
+	lastore:
+		if (*(optop - 3) == 0) {
+			ERROR("NullPointerException\n");
+			exit(1);
+		}
+		if (*(optop - 2) >= ((struct array *) *(optop - 3))->length
+			|| *(optop - 2) < 0) {
+
+			ERROR("ArrayIndexOutOfBoundsException\n");
+			exit(1);
+		}
+		((u8 *) ((struct array *) *(optop - 3))->arr)[*(optop - 2)]
+			= *((u8 *) (optop - 1));
+		optop -= 4;
+		NEXT();
+	fastore:
+		if (*(optop - 2) == 0) {
+			ERROR("NullPointerException\n");
+			exit(1);
+		}
+		if (*(optop - 1) >= ((struct array *) *(optop - 2))->length
+			|| *(optop - 1) < 0) {
+
+			ERROR("ArrayIndexOutOfBoundsException\n");
+			exit(1);
+		}
+		((float *) ((struct array *) *(optop - 2))->arr)[*(optop - 1)]
+			= *((float *) optop);
+		optop -= 3;
+		NEXT();
+	dastore:
+		if (*(optop - 3) == 0) {
+			ERROR("NullPointerException\n");
+			exit(1);
+		}
+		if (*(optop - 2) >= ((struct array *) *(optop - 3))->length
+			|| *(optop - 2) < 0) {
+
+			ERROR("ArrayIndexOutOfBoundsException\n");
+			exit(1);
+		}
+		((double *) ((struct array *) *(optop - 3))->arr)[*(optop - 2)]
+			= *((double *) (optop - 1));
+		optop -= 4;
+		NEXT();
+
+	bastore:
+		if (*(optop - 2) == 0) {
+			ERROR("NullPointerException\n");
+			exit(1);
+		}
+		if (*(optop - 1) >= ((struct array *) *(optop - 2))->length
+			|| *(optop - 1) < 0) {
+
+			ERROR("ArrayIndexOutOfBoundsException\n");
+			exit(1);
+		}
+		((u1 *) ((struct array *) *(optop - 2))->arr)[*(optop - 1)] = *optop;
+		optop -= 3;
+		NEXT();
+
+	castore:
+		if (*(optop - 2) == 0) {
+			ERROR("NullPointerException\n");
+			exit(1);
+		}
+		if (*(optop - 1) >= ((struct array *) *(optop - 2))->length
+			|| *(optop - 1) < 0) {
+
+			ERROR("ArrayIndexOutOfBoundsException\n");
+			exit(1);
+		}
+		((u1 *) ((struct array *) *(optop - 2))->arr)[*(optop - 1)]
+			= *optop;
+		optop -= 3;
+		NEXT();
+	sastore:
+		if (*(optop - 2) == 0) {
+			ERROR("NullPointerException\n");
+			exit(1);
+		}
+		if (*(optop - 1) >= ((struct array *) *(optop - 2))->length
+			|| *(optop - 1) < 0) {
+
+			ERROR("ArrayIndexOutOfBoundsException\n");
+			exit(1);
+		}
+		((u2 *) ((struct array *) *(optop - 2))->arr)[*(optop - 1)]
+			= *((u2 *) optop);
+		optop -= 3;
+		NEXT();
 	pop:
 		optop--;
 		NEXT();
@@ -631,19 +876,49 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		optop -= 2;
 		NEXT();
 	dup:
-		// TODO: Implement
+		*(optop + 1) = *optop;
+		optop++;
+		NEXT();
 	dup_x1:
-		// TODO: Implement
+		*(optop + 1) = *optop;
+		*optop = *(optop - 1);
+		*(optop - 1) = *(optop + 1);
+		optop++;
+		NEXT();
 	dup_x2:
-		// TODO: Implement
+		*(optop + 1) = *optop;
+		*optop = *(optop - 1);
+		*(optop - 1) = *(optop - 2);
+		*(optop - 2) = *(optop + 1);
+		optop++;
+		NEXT();
 	dup2:
-		// TODO: Implement
+		*(optop + 1) = *(optop - 1);
+		*(optop + 2) = *optop;
+		optop += 2;
+		NEXT();
 	dup2_x1:
-		// TODO: Implement
+		*(optop + 2) = *optop;
+		*(optop + 1) = *(optop - 1);
+		*optop = *(optop - 2);
+		*(optop - 1) = *(optop + 2);
+		*(optop - 2) = *(optop + 1);
+		optop += 2;
+		NEXT();
 	dup2_x2:
-		// TODO: Implement
+		*(optop + 2) = *optop;
+		*(optop + 1) = *(optop - 1);
+		*optop = *(optop - 2);
+		*(optop - 1) = *(optop - 3);
+		*(optop - 2) = *(optop + 2);
+		*(optop - 3) = *(optop + 1);
+		optop += 2;
+		NEXT();
 	swap:
-		// TODO: Implement
+		tmp_u4 = *optop;
+		*optop = *(optop - 1);
+		*(optop - 1) = tmp_u4;
+		NEXT();
 	iadd:
 		optop--;
 		*optop = (i4) *optop + (i4) *(optop + 1);
@@ -849,7 +1124,7 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		optop -= 2;
 		NEXT();
 	iinc:
-		*(frame + *pc) += (i1) *(pc + 1);
+		*((i4 *) frame + *pc) += *((i1 *) pc + 1);
 		pc += 2;
 		NEXT();
 	i2l:
@@ -1100,7 +1375,7 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		NEXT();
 
 	_goto:
-		pc += TWO_BYTE_INDEX(pc);
+		pc += TWO_BYTE_INDEX(pc) - 1;
 		NEXT();
 
 	tableswitch:
@@ -1224,7 +1499,19 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		optop = tmp_frame + 1;
 
 		NEXT();
+	areturn:
+		tmp_frame = frame;
+		frame = GET_OLDFRAME(tmp_frame, localc);
+		pc = GET_OLDPC(tmp_frame, localc);
+		c = GET_OLDC(tmp_frame, localc);
+		cp = c->constant_pool;
 
+		localc = GET_OLDLOCALC(tmp_frame, localc);
+
+		*tmp_frame = *optop; // return value
+		optop = tmp_frame;
+
+		NEXT();
 	_return:
 		tmp_frame = frame;
 
@@ -1254,25 +1541,28 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		}
 
 		f_block = f->r_field;
-		
-		switch (*f_block->signature) {
-			case 'B':
-			case 'C':
-			case 'F':
-			case 'I':
-			case 'S':
-			case 'Z':
-				*++optop = f_block->byte1;
-				break;
+	
+		if (!strcmp("D", f_block->signature)
+			|| !strcmp("J", f_block->signature)) {
 
-			case 'D':
-			case 'L':
-				*++optop = f_block->byte1;
-				*++optop = f_block->byte2;
-				break;
+			*++optop = f_block->byte1;
+			*++optop = f_block->byte2;
+		} else if (!strncmp("[", f_block->signature, 1)
+			|| !strcmp("B", f_block->signature)
+			|| !strcmp("C", f_block->signature)
+			|| !strcmp("F", f_block->signature)
+			|| !strcmp("I", f_block->signature)
+			|| !strcmp("S", f_block->signature)
+			|| !strcmp("Z", f_block->signature)) {
 
-			// arrays and objects currently not supported
+			*++optop = f_block->byte1;
+		} else {
+
+			ERROR("getstatic: Signature \"%s\" not supported",
+				f_block->signature);
+			exit(1);
 		}
+
 		NEXT();
 	putstatic:
 		index = TWO_BYTE_INDEX(pc);
@@ -1292,23 +1582,25 @@ void run(struct ClassFile *c, struct r_method_info *main)
 
 		f_block = f->r_field;
 
-		switch (*f_block->signature) {
-			case 'B':
-			case 'C':
-			case 'F':
-			case 'I':
-			case 'S':
-			case 'Z':
-				f_block->byte1 = *optop--;
-				break;
+		if (!strcmp("D", f_block->signature)
+			|| !strcmp("J", f_block->signature)) {
 
-			case 'D':
-			case 'L':
-				f_block->byte2 = *optop--;
-				f_block->byte1 = *optop--;
-				break;
+			f_block->byte2 = *optop--;
+			f_block->byte1 = *optop--;
+		} else if (!strncmp("[", f_block->signature, 1)
+			|| !strcmp("B", f_block->signature)
+			|| !strcmp("C", f_block->signature)
+			|| !strcmp("F", f_block->signature)
+			|| !strcmp("I", f_block->signature)
+			|| !strcmp("S", f_block->signature)
+			|| !strcmp("Z", f_block->signature)) {
 
-			// arrays and objects currently not supported
+			f_block->byte1 = *optop--;
+		} else {
+
+			ERROR("putstatic: Signature \"%s\" not supported",
+				f_block->signature);
+			exit(1);
 		}
 		NEXT();
 
@@ -1351,6 +1643,66 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		frame = tmp_frame;
 		localc = c_attr->max_locals;	
 
+		NEXT();
+
+	newarray:
+		if (*optop < 0) {
+			ERROR("NegativeArraySizeException\n");
+			exit(1);
+		}
+
+		size_t type_size;
+		switch (*pc) {
+			case T_BOOLEAN:
+				type_size = sizeof(u1);
+				break;
+			case T_CHAR:
+				type_size = sizeof(char);
+				break;
+			case T_FLOAT:
+				type_size = sizeof(float);
+				break;
+			case T_DOUBLE:
+				type_size = sizeof(double);
+				break;
+			case T_BYTE:
+				type_size = sizeof(u1);
+				break;
+			case T_SHORT:
+				type_size = sizeof(u2);
+				break;
+			case T_INT:
+				type_size = sizeof(u4);
+				break;
+			case T_LONG:
+				type_size = sizeof(u8);
+				break;
+			default:
+				ERROR("newarray: Invalid type %d\n", *pc);
+				exit(1);
+		}
+		pc++;
+		struct array *array_struct = malloc(sizeof(struct array));
+		if (array_struct == NULL) {
+			ERROR("newarray: Could not allocate memory: %s\n", strerror(errno));
+			exit(1);
+		}
+		void *array = calloc(*optop, type_size);
+		if (array == NULL) {
+			ERROR("newarray: Could not allocate memory: %s\n", strerror(errno));
+			exit(1);
+		}
+		array_struct->length = *optop;
+		array_struct->arr = array;
+		*optop = (u4) array_struct;
+
+		NEXT();
+	arraylength:
+		if (*optop == 0) {
+			ERROR("NullPointerException\n");
+			exit(1);
+		}
+		*optop = ((struct array *) *optop)->length;
 		NEXT();
 
 	// custom method, clinit_c has to be set before

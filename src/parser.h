@@ -69,6 +69,17 @@ typedef int64_t i8;
 
 #define IS_NATIVE(method) (method->access_flags & ACC_NATIVE)
 
+// array types
+#define T_BOOLEAN (4)
+#define T_CHAR (5)
+#define T_FLOAT (6)
+#define T_DOUBLE (7)
+#define T_BYTE (8)
+#define T_SHORT (9)
+#define T_INT (10)
+#define T_LONG (11)
+
+
 struct r_methodref_info {
 	struct ClassFile *r_class;
 	struct r_method_info *r_method;

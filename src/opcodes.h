@@ -1,5 +1,5 @@
 #define NOP (0)
-
+#define ACONST_NULL (1) //
 #define ICONST_M1 (2)
 #define ICONST_0 (3)
 #define ICONST_1 (4)
@@ -44,14 +44,19 @@
 #define ALOAD_1 (43)
 #define ALOAD_2 (44)
 #define ALOAD_3 (45)
+#define IALOAD (46)
+#define LALOAD (47)
+#define FALOAD (48)
+#define DALOAD (49)
 
-// array load
-
+#define BALOAD (51)
+#define CALOAD (52)
+#define SALOAD (53)
 #define ISTORE (54)
 #define LSTORE (55)
 #define FSTORE (56)
 #define DSTORE (57)
-
+#define ASTORE (58)
 #define ISTORE_0 (59)
 #define ISTORE_1 (60)
 #define ISTORE_2 (61)
@@ -68,9 +73,18 @@
 #define DSTORE_1 (72)
 #define DSTORE_2 (73)
 #define DSTORE_3 (74)
+#define ASTORE_0 (75)
+#define ASTORE_1 (76)
+#define ASTORE_2 (77)
+#define ASTORE_3 (78)
+#define IASTORE (79)
+#define LASTORE (80)
+#define FASTORE (81)
+#define DASTORE (82)
 
-// object and array store
-
+#define BASTORE (84)
+#define CASTORE (85)
+#define SASTORE (86)
 #define POP (87)
 #define POP2 (88)
 #define DUP (89)
@@ -162,7 +176,7 @@
 #define LRETURN (173)
 #define FRETURN (174)
 #define DRETURN (175)
-
+#define ARETURN (176)
 #define RETURN (177)
 #define GETSTATIC (178)
 #define PUTSTATIC (179)
@@ -171,6 +185,12 @@
 
 #define INVOKENONVIRTUAL (183)
 #define INVOKESTATIC (184)
+
+// interface and dynamic function invocation, new object
+
+#define NEWARRAY (188)
+
+#define ARRAYLENGTH (190)
 
 
 #define IMPDEP1 (254)
