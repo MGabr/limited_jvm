@@ -65,6 +65,7 @@ if (instrs_counter == 0) {\
 #ifndef _TESTMODE_
 	#define NEXT() LOG_INSTR;\
 goto *table[*pc++];
+    #define NEXT_AFTER_INITIALIZE_STATIC() NEXT();
 #endif
 
 

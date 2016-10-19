@@ -12,13 +12,15 @@
  * Only the messages with a log level equal to or larger than the current log
  * level are printed.
  */
-#define LOG_LEVEL LOG_LEVEL_INFO
+#define LOG_LEVEL LOG_LEVEL_ERROR
 
 /**
  * If _LOG_INSTRS_ is defined, all executed vm instructions are logged.
  * This only works if _TESTMODE_ is also defined.
+ * Note that this should only be used for manual tests, as the additional output
+ * will break tests that check the output.
  */
-#define _LOG_INSTRS_
+//#define _LOG_INSTRS_
 
 /**
  * If _TESTMODE_ is defined, the vm terminates after a specified number of
@@ -26,6 +28,6 @@
  * Comment this out during normal execution of the vm to prevent performance
  * degradation.
  */
-#define _TESTMODE_
+//#define _TESTMODE_
 
 #endif
