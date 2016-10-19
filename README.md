@@ -1,8 +1,10 @@
-An implementation of a limited subset of the JVM.
+# Limited JVM
 
-# Features
+An implementation of a limited subset of the JVM for the "SS2016 Abstrake Maschinen" course at TU Vienna.
 
-## What is supported
+## Features
+
+### What is supported
 
 All primitive arithmetic and logical operations.
 All comparisons and control flow instructions.
@@ -12,7 +14,7 @@ Static functions and fields including loading of the required classes.
 Native println instructions for all primitive types and Strings (e.g. `private static native void println(int n);`)
 
 
-## What is not supported
+### What is not supported
 
 Objects =(
 Interfaces
@@ -22,7 +24,7 @@ All other native methods such as reading from stdin.
 Other java language features added later such as annotations, generics, etc. in case they rely on unsupported or additional bytecode instructions.
 
 
-## What is not fully supported
+### What is not fully supported
 
 Portability: The JVM was only tested on a 64-bit little endian computer running Ubuntu (compiled as 32-bit binary with the -m32 flag). Other architectures or operating systems might have some problems.
 Full standard compatibility: The results of floating point operations may not always conform to the guarantees given by the JVM standard. At other points there might also be deviations from the standard, especially in edge cases.
@@ -31,9 +33,9 @@ Full standard compatibility: The results of floating point operations may not al
 A complete list of all supported bytecode instructions can be found in opcodes.h in the src folder.
 
 
-# How to use
+## How to use
 
-## Compiling the JVM
+### Compiling the JVM
 
 To compile the JVM simply run `make` in the src folder.
 This will require a c compiler that supports GNU labels as values.
@@ -48,14 +50,14 @@ The later command is required for the tests.
 In settings.h you can customise the log output of the created JVM binary, but in most cases you will want to use the standard settings with `LOG_LEVEL` set to `LOG_LEVEL_ERROR` and `_LOG_INSTRS_` as well as `_TESTMODE_` commented out.
 
 
-## Running java class files
+### Running java class files
 
 To run java class files simply run `./java` in the root of your class folder structure (e.g. in the folder above "org" if your main class is in the package/folder "org.example.test") followed by the relative path and name of the main class (e.g. "org/example/test/MainClass" in the previous case if the main class is named "MainClass").
 
 In the folder manual_tests, there are some example java files whose compiled class file can be run with the limited JVM.
 
 
-## Running the tests
+### Running the tests
 
 Install the required googletest framework as shared library:
 ```
