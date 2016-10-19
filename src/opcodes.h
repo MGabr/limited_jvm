@@ -1,5 +1,5 @@
 #define NOP (0)
-#define ACONST_NULL (1) //
+
 #define ICONST_M1 (2)
 #define ICONST_0 (3)
 #define ICONST_1 (4)
@@ -183,7 +183,6 @@
 
 // object field access and function invocation
 
-#define INVOKENONVIRTUAL (183)
 #define INVOKESTATIC (184)
 
 // interface and dynamic function invocation, new object

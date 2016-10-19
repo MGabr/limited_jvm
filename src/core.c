@@ -218,185 +218,60 @@ void run(struct ClassFile *c, struct r_method_info *main)
 
 	//  ------------ opcode table -----------------------------------
 
-	void *table[255];
-	table[NOP] = &&nop;
-	table[ICONST_M1] = &&iconst_m1;
-	table[ICONST_0] = &&iconst_0;
-	table[ICONST_1] = &&iconst_1;
-	table[ICONST_2] = &&iconst_2;
-	table[ICONST_3] = &&iconst_3;
-	table[ICONST_4] = &&iconst_4;
-	table[ICONST_5] = &&iconst_5;
-	table[LCONST_0] = &&lconst_0;
-	table[LCONST_1] = &&lconst_1;
-	table[FCONST_0] = &&fconst_0;
-	table[FCONST_1] = &&fconst_1;
-	table[FCONST_2] = &&fconst_2;
-	table[DCONST_0] = &&dconst_0;
-	table[DCONST_1] = &&dconst_1;
-	table[BIPUSH] = &&bipush;
-	table[SIPUSH] = &&sipush;
-	table[LDC1] = &&ldc1;
-	table[LDC2] = &&ldc2;
-	table[LDC2W] = &&ldc2w;
-	table[ILOAD] = &&iload;
-	table[LLOAD] = &&lload;
-	table[FLOAD] = &&fload;
-	table[DLOAD] = &&dload;
-	table[ALOAD] = &&aload;
-	table[ILOAD_0] = &&iload_0;
-	table[ILOAD_1] = &&iload_1;
-	table[ILOAD_2] = &&iload_2;
-	table[ILOAD_3] = &&iload_3;
-	table[LLOAD_0] = &&lload_0;
-	table[LLOAD_1] = &&lload_1;
-	table[LLOAD_2] = &&lload_2;
-	table[LLOAD_3] = &&lload_3;
-	table[FLOAD_0] = &&fload_0;
-	table[FLOAD_1] = &&fload_1;
-	table[FLOAD_2] = &&fload_2;
-	table[FLOAD_3] = &&fload_3;
-	table[DLOAD_0] = &&dload_0;
-	table[DLOAD_1] = &&dload_1;
-	table[DLOAD_2] = &&dload_2;
-	table[DLOAD_3] = &&dload_3;
-	table[ALOAD_0] = &&aload_0;
-	table[ALOAD_1] = &&aload_1;
-	table[ALOAD_2] = &&aload_2;
-	table[ALOAD_3] = &&aload_3;
-	table[IALOAD] = &&iaload;
-	table[LALOAD] = &&laload;
-	table[FALOAD] = &&faload;
-	table[DALOAD] = &&daload;
-	table[BALOAD] = &&baload;
-	table[CALOAD] = &&caload;
-	table[SALOAD] = &&saload;
-	table[ISTORE] = &&istore;
-	table[LSTORE] = &&lstore;
-	table[FSTORE] = &&fstore;
-	table[DSTORE] = &&dstore;
-	table[ASTORE] = &&astore;
-	table[ISTORE_0] = &&istore_0;
-	table[ISTORE_1] = &&istore_1;
-	table[ISTORE_2] = &&istore_2;
-	table[ISTORE_3] = &&istore_3;
-	table[LSTORE_0] = &&lstore_0;
-	table[LSTORE_1] = &&lstore_1;
-	table[LSTORE_2] = &&lstore_2;
-	table[LSTORE_3] = &&lstore_3;
-	table[FSTORE_0] = &&fstore_0;
-	table[FSTORE_1] = &&fstore_1;
-	table[FSTORE_2] = &&fstore_2;
-	table[FSTORE_3] = &&fstore_3;
-	table[DSTORE_0] = &&dstore_0;
-	table[DSTORE_1] = &&dstore_1;
-	table[DSTORE_2] = &&dstore_2;
-	table[DSTORE_3] = &&dstore_3;
-	table[ASTORE_0] = &&astore_0;
-	table[ASTORE_1] = &&astore_1;
-	table[ASTORE_2] = &&astore_2;
-	table[ASTORE_3] = &&astore_3;
-	table[IASTORE] = &&iastore;
-	table[LASTORE] = &&lastore;
-	table[FASTORE] = &&fastore;
-	table[DASTORE] = &&dastore;
-	table[BASTORE] = &&bastore;
-	table[CASTORE] = &&castore;
-	table[SASTORE] = &&sastore;
-	table[POP] = &&pop;
-	table[POP2] = &&pop2;
-	table[DUP] = &&dup;
-	table[DUP_X1] = &&dup_x1;
-	table[DUP_X2] = &&dup_x2;
-	table[DUP2] = &&dup2;
-	table[DUP2_X1] = &&dup2_x1;
-	table[DUP2_X2] = &&dup2_x2;
-	table[SWAP] = &&swap;
-	table[IADD] = &&iadd;
-	table[LADD] = &&ladd;
-	table[FADD] = &&fadd;
-	table[DADD] = &&dadd;
-	table[ISUB] = &&isub;
-	table[LSUB] = &&lsub;
-	table[FSUB] = &&fsub;
-	table[DSUB] = &&dsub;
-	table[IMUL] = &&imul;
-	table[LMUL] = &&lmul;
-	table[FMUL] = &&fmul;
-	table[DMUL] = &&dmul;
-	table[IDIV] = &&idiv;
-	table[LDIV] = &&ldiv;
-	table[FDIV] = &&fdiv;
-	table[DDIV] = &&ddiv;
-	table[IREM] = &&irem;
-	table[LREM] = &&lrem;
-	table[FREM] = &&frem;
-	table[DREM] = &&drem;
-	table[INEG] = &&ineg;
-	table[LNEG] = &&lneg;
-	table[FNEG] = &&fneg;
-	table[DNEG] = &&dneg;
-	table[ISHL] = &&ishl;
-	table[LSHL] = &&lshl;
-	table[ISHR] = &&ishr;
-	table[LSHR] = &&lshr;
-	table[IUSHR] = &&iushr;
-	table[LUSHR] = &&lushr;
-	table[IAND] = &&iand;
-	table[LAND] = &&land;
-	table[IOR] = &&ior;
-	table[LOR] = &&lor;
-	table[IXOR] = &&ixor;
-	table[LXOR] = &&lxor;
-	table[IINC] = &&iinc;
-	table[I2L] = &&i2l;
-	table[I2F] = &&i2f;
-	table[I2D] = &&i2d;
-	table[L2I] = &&l2i;
-	table[L2F] = &&l2f;
-	table[L2D] = &&l2d;
-	table[F2I] = &&f2i;
-	table[F2L] = &&f2l;
-	table[F2D] = &&f2d;
-	table[D2I] = &&d2i;
-	table[D2L] = &&d2l;
-	table[D2F] = &&d2f;
-	table[INT2BYTE] = &&int2byte;
-	table[INT2CHAR] = &&int2char;
-	table[INT2SHORT] = &&int2short;
-	table[LCMP] = &&lcmp;
-	table[FCMPL] = &&fcmpl;
-	table[FCMPG] = &&fcmpg;
-	table[DCMPL] = &&dcmpl;
-	table[DCMPG] = &&dcmpg;
-	table[IFEQ] = &&ifeq;
-	table[IFNE] = &&ifne;
-	table[IFLT] = &&iflt;
-	table[IFGE] = &&ifge;
-	table[IFGT] = &&ifgt;
-	table[IFLE] = &&ifle;
-	table[IF_ICMPEQ] = &&if_icmpeq;
-	table[IF_ICMPNE] = &&if_icmpne;
-	table[IF_ICMPLT] = &&if_icmplt;
-	table[IF_ICMPGE] = &&if_icmpge;
-	table[IF_ICMPGT] = &&if_icmpgt;
-	table[IF_ICMPLE] = &&if_icmple;
-	table[GOTO] = &&_goto;
-	table[TABLESWITCH] = &&tableswitch;
-	table[LOOKUPSWITCH] = &&lookupswitch;
-	table[IRETURN] = &&ireturn;
-	table[LRETURN] = &&lreturn;
-	table[FRETURN] = &&freturn;
-	table[DRETURN] = &&dreturn;
-	table[ARETURN] = &&areturn;
-	table[RETURN] = &&_return;
-	table[GETSTATIC] = &&getstatic;
-	table[PUTSTATIC] = &&putstatic;
-	table[INVOKENONVIRTUAL] = &&invokenonvirtual;
-	table[INVOKESTATIC] = &&invokestatic;
-	table[NEWARRAY] = &&newarray;
-	table[ARRAYLENGTH] = &&arraylength;
-	table[IMPDEP1] = &&impdep1;
+	void *table[256] = {
+		&&nop, &&not_sup, &&iconst_m1, &&iconst_0, &&iconst_1,
+		&&iconst_2, &&iconst_3, &&iconst_4, &&iconst_5, &&lconst_0,
+		&&lconst_1, &&fconst_0, &&fconst_1, &&fconst_2, &&dconst_0,
+		&&dconst_1, &&bipush, &&sipush, &&ldc1, &&ldc2,
+		&&ldc2w, &&iload, &&lload, &&fload, &&dload,
+		&&aload, &&iload_0, &&iload_1, &&iload_2, &&iload_3,
+		&&lload_0, &&lload_1, &&lload_2, &&lload_3, &&fload_0,
+		&&fload_1, &&fload_2, &&fload_3, &&dload_0, &&dload_1,
+		&&dload_2, &&dload_3, &&aload_0, &&aload_1, &&aload_2,
+		&&aload_3, &&iaload, &&laload, &&faload, &&daload,
+		&&not_sup, &&baload, &&caload, &&saload, &&istore,
+		&&lstore, &&fstore, &&dstore, &&astore, &&istore_0,
+		&&istore_1, &&istore_2, &&istore_3, &&lstore_0, &&lstore_1,
+		&&lstore_2, &&lstore_3, &&fstore_0, &&fstore_1, &&fstore_2,
+		&&fstore_3, &&dstore_0, &&dstore_1, &&dstore_2, &&dstore_3,
+		&&astore_0, &&astore_1, &&astore_2, &&astore_3, &&iastore,
+		&&lastore, &&fastore, &&dastore, &&not_sup, &&bastore,
+		&&castore, &&sastore, &&pop, &&pop2, &&dup,
+		&&dup_x1, &&dup_x2, &&dup2, &&dup2_x1, &&dup2_x2,
+		&&swap, &&iadd, &&ladd, &&fadd, &&dadd,
+		&&isub, &&lsub, &&fsub, &&dsub, &&imul,
+		&&lmul, &&fmul, &&dmul, &&idiv, &&ldiv,
+		&&fdiv, &&ddiv, &&irem, &&lrem, &&frem,
+		&&drem, &&ineg, &&lneg, &&fneg, &&dneg,
+		&&ishl, &&lshl, &&ishr, &&lshr, &&iushr,
+		&&lushr, &&iand, &&land, &&ior, &&lor,
+		&&ixor, &&lxor, &&iinc, &&i2l, &&i2f,
+		&&i2d, &&l2i, &&l2f, &&l2d, &&f2i,
+		&&f2l, &&f2d, &&d2i, &&d2l, &&d2f,
+		&&int2byte, &&int2char, &&int2short, &&lcmp, &&fcmpl,
+		&&fcmpg, &&dcmpl, &&dcmpg, &&ifeq, &&ifne,
+		&&iflt, &&ifge, &&ifgt, &&ifle, &&if_icmpeq,
+		&&if_icmpne, &&if_icmplt, &&if_icmpge, &&if_icmpgt, &&if_icmple,
+		&&not_sup, &&not_sup, &&_goto, &&not_sup, &&not_sup,
+		&&tableswitch, &&lookupswitch, &&ireturn, &&lreturn, &&freturn,
+		&&dreturn, &&areturn, &&_return, &&getstatic, &&putstatic,
+		&&not_sup, &&not_sup, &&not_sup, &&not_sup, &&invokestatic,
+		&&not_sup, &&not_sup, &&not_sup, &&newarray, &&not_sup,
+		&&arraylength, &&not_sup, &&not_sup, &&not_sup, &&not_sup,
+		&&not_sup, &&not_sup, &&not_sup, &&not_sup, &&not_sup,
+		&&not_sup, &&not_sup, &&not_sup, &&no_inst, &&no_inst,
+		&&no_inst, &&no_inst, &&no_inst, &&no_inst, &&no_inst,
+		&&no_inst, &&no_inst, &&no_inst, &&no_inst, &&no_inst,
+		&&no_inst, &&no_inst, &&no_inst, &&no_inst, &&no_inst,
+		&&no_inst, &&no_inst, &&no_inst, &&no_inst, &&no_inst,
+		&&no_inst, &&no_inst, &&no_inst, &&no_inst, &&no_inst,
+		&&no_inst, &&no_inst, &&no_inst, &&no_inst, &&no_inst,
+		&&no_inst, &&no_inst, &&no_inst, &&no_inst, &&no_inst,
+		&&no_inst, &&no_inst, &&no_inst, &&no_inst, &&no_inst,
+		&&no_inst, &&no_inst, &&no_inst, &&no_inst, &&no_inst,
+		&&no_inst, &&no_inst, &&no_inst, &&no_inst, &&impdep1,
+		&&not_sup
+	};
 
 	// initialize set of predefined native method
 	init_natives();
@@ -428,6 +303,15 @@ void run(struct ClassFile *c, struct r_method_info *main)
 	struct r_method_info *m_block;
 	struct Code_attribute *c_attr;
 	u4 tmp_u4;
+
+	not_sup:
+		ERROR(
+			"Bytecode instruction %s not supported by this JVM.\n", 
+			opcode_strings[*(pc - 1)]);
+		exit(1);
+	no_inst:
+		ERROR("No instruction mapped to bytecode %d.\n", *(pc - 1));
+		exit(1);
 
 	nop:
 		// do nothing
@@ -1605,7 +1489,6 @@ void run(struct ClassFile *c, struct r_method_info *main)
 		}
 		NEXT();
 
-	invokenonvirtual:
 	invokestatic:
 		index = TWO_BYTE_INDEX(pc);
 		pc += 2;
