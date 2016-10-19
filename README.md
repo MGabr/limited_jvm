@@ -51,7 +51,8 @@ In settings.h you can customise the log output of the created JVM binary, but in
 
 ### Running java class files
 
-To run java class files simply run `./java` in the root of your class folder structure (e.g. in the folder above "org" if your main class is in the package/folder "org.example.test") followed by the relative path and name of the main class (e.g. "org/example/test/MainClass" in the previous case if the main class is named "MainClass").  
+After you compiled the JVM, you have a binary named `java`.  
+To run java class files move this binary and run `./java` in the root of your class folder structure (e.g. in the folder above "org" if your main class is in the package/folder "org.example.test") followed by the relative path and name of the main class (e.g. "org/example/test/MainClass" in the previous case if the main class is named "MainClass").  
 
 In the folder manual_tests, there are some example java files whose compiled class file can be run with the limited JVM.  
 
